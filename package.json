@@ -40,6 +40,8 @@
     "eslint-plugin-nuxt": "^2.0.0",
     "eslint-plugin-vue": "^7.10.0",
     "jest": "^27.0.4",
+    "jsdom": "^16.6.0",
+    "jsdom-global": "^3.0.2",
     "postcss": "^8.3.0",
     "ts-jest": "^27.0.2",
     "vue-jest": "^3.0.7"

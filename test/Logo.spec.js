@@ -1,5 +1,6 @@
-import { mount } from '@vue/test-utils'
-import Logo from '@/components/Logo.vue'
+require('jsdom-global')() // NOTE: must import at first
+const { mount } = require('@vue/test-utils')
+const Logo = require('@/components/Logo.vue')
 
 describe('Logo', () => {
   test('is a Vue instance', () => {
