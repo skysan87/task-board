@@ -56,7 +56,7 @@ export default {
   computed: {
     todos: {
       get () {
-        const todos = this.$store.getters['todo/getOrderdTodos']
+        const todos = this.$store.getters['Todo/getOrderdTodos']
 
         return todos.filter(t => t.startdate !== null && t.enddate !== null)
           .map((t) => {
@@ -83,8 +83,8 @@ export default {
     showDialog (id) {
       delete this.dialog
 
-      const todo = this.$store.getters['todo/getTodoById'](id)
-      const list = this.$store.getters['todolist/getLists']
+      const todo = this.$store.getters['Todo/getTodoById'](id)
+      const list = this.$store.getters['Todolist/getLists']
 
       this.dialog = new DialogController({
         propsData: {
@@ -95,15 +95,15 @@ export default {
         }
       })
       this.dialog.$on('update', (todo) => {
-        this.$store.dispatch('todo/update', todo)
+        this.$store.dispatch('Todo/update', todo)
       })
       this.dialog.$on('delete', (todoId) => {
-        this.$store.dispatch('todo/delete', todoId)
+        this.$store.dispatch('Todo/delete', todoId)
       })
       this.dialog.$mount()
     },
     backToList () {
-      const listId = this.$store.getters['todo/getCurrentListId']
+      const listId = this.$store.getters['Todo/getCurrentListId']
       this.$router.push(`/todolist/${listId}`)
     }
   }

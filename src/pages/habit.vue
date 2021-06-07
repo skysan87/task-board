@@ -55,12 +55,12 @@ export default {
   computed: {
     habits: {
       get () {
-        return this.$store.getters['habit/getList']
+        return this.$store.getters['Habit/getList']
       }
     },
     currentFilterId: {
       get () {
-        return this.$store.getters['habit/getCurrentFilter']
+        return this.$store.getters['Habit/getCurrentFilter']
       }
     },
     currentFilterName () {
@@ -83,13 +83,13 @@ export default {
         propsData: {
           parent: this.$root.$el,
           target: new Habit('', {
-            rootId: this.$store.getters['habit/getRootId']
+            rootId: this.$store.getters['Habit/getRootId']
           }),
           isCreateMode: true
         }
       })
       this.dialog.$on('add', (habit) => {
-        this.$store.dispatch('habit/add', habit)
+        this.$store.dispatch('Habit/add', habit)
           .then(() => this.$toast.success('登録しました'))
           .catch((error) => {
             this.$toast.error(error.message)
@@ -102,12 +102,12 @@ export default {
       this.dialog = new DialogController({
         propsData: {
           parent: this.$root.$el,
-          target: this.$store.getters['habit/getById'](id),
+          target: this.$store.getters['Habit/getById'](id),
           isCreateMode: false
         }
       })
       this.dialog.$on('update', (habit) => {
-        this.$store.dispatch('habit/update', habit)
+        this.$store.dispatch('Habit/update', habit)
       })
       this.dialog.$mount()
     }

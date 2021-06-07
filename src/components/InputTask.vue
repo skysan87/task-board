@@ -66,7 +66,7 @@ export default {
         return
       }
       this.todo.startdate = this.todo.enddate = this.checkDeadline()
-      this.$store.dispatch('todo/add', this.todo.getData())
+      this.$store.dispatch('Todo/add', this.todo.getData())
         .catch((error) => {
           this.$toast.error(error.message)
         })
@@ -76,8 +76,8 @@ export default {
     },
     addDetail () {
       this.todo.startdate = this.todo.enddate = this.checkDeadline()
-      this.todo.listId = this.$store.getters['todo/getCurrentListId']
-      const list = this.$store.getters['todolist/getLists']
+      this.todo.listId = this.$store.getters['Todo/getCurrentListId']
+      const list = this.$store.getters['Todolist/getLists']
 
       delete this.dialog
       this.dialog = new DialogController({
@@ -89,7 +89,7 @@ export default {
         }
       })
       this.dialog.$on('add', (todo) => {
-        this.$store.dispatch('todo/add', todo.getData())
+        this.$store.dispatch('Todo/add', todo.getData())
           .catch((error) => {
             this.$toast.error(error.message)
           })

@@ -70,14 +70,14 @@ export default {
   },
   computed: {
     canRemove () {
-      return this.$store.getters['todo/canRemove']
+      return this.$store.getters['Todo/canRemove']
     },
     filterOption: {
       get () {
-        return this.$store.getters['todo/getSelectedState']
+        return this.$store.getters['Todo/getSelectedState']
       },
       set (value) {
-        this.$store.dispatch('todo/changeFilter', value)
+        this.$store.dispatch('Todo/changeFilter', value)
       }
     }
   },
@@ -86,7 +86,7 @@ export default {
      * 各ステータスのタスク数
      */
     todoCounts (state) {
-      return this.$store.getters['todo/getTaskCount'](state)
+      return this.$store.getters['Todo/getTaskCount'](state)
     },
     /**
      * ステータスの色
@@ -112,14 +112,14 @@ export default {
      * 完了済みのタスクを削除
      */
     deleteDone () {
-      this.$store.dispatch('todo/deleteDone')
+      this.$store.dispatch('Todo/deleteDone')
     },
     switchRemoveButton () {
-      this.$store.dispatch('todo/switchEdit')
+      this.$store.dispatch('Todo/switchEdit')
     },
     openListDialog () {
-      const listId = this.$store.getters['todo/getCurrentListId']
-      const todolist = this.$store.getters['todolist/getListById'](listId)
+      const listId = this.$store.getters['Todo/getCurrentListId']
+      const todolist = this.$store.getters['Todolist/getListById'](listId)
 
       delete this.dialog
       this.dialog = new DialogController({
@@ -130,7 +130,7 @@ export default {
         }
       })
       this.dialog.$on('add', (todolist) => {
-        this.$store.dispatch('todolist/update', todolist)
+        this.$store.dispatch('Todolist/update', todolist)
       })
       this.dialog.$mount()
     }

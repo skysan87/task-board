@@ -56,12 +56,12 @@ export default {
   },
   computed: {
     canRemove () {
-      return this.$store.getters['todo/canRemove']
+      return this.$store.getters['Todo/canRemove']
     }
   },
   methods: {
     changeEventHandler () {
-      this.$store.dispatch('todo/changeState', this.todo.id)
+      this.$store.dispatch('Todo/changeState', this.todo.id)
     },
     badgeColor (state) {
       return getStateColor(state)
@@ -70,7 +70,7 @@ export default {
       this.$emit('edit', this.todo.id)
     },
     removeEventHandler () {
-      this.$store.dispatch('todo/delete', this.todo.id)
+      this.$store.dispatch('Todo/delete', this.todo.id)
     }
   }
 }

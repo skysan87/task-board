@@ -137,7 +137,7 @@ export default {
   computed: {
     todolists: {
       get () {
-        return this.$store.getters['todolist/getLists']
+        return this.$store.getters['Todolist/getLists']
       },
       // eslint-disable-next-line
       set(value) {
@@ -146,12 +146,12 @@ export default {
     },
     currentFilter: {
       get () {
-        return this.$store.getters['habit/getCurrentFilter']
+        return this.$store.getters['Habit/getCurrentFilter']
       }
     },
     globalMessage: {
       get () {
-        const config = this.$store.getters['config/getConfig']
+        const config = this.$store.getters['Config/getConfig']
         return config !== null ? config.globalMessage : ''
       }
     },
@@ -172,8 +172,8 @@ export default {
   },
   methods: {
     init () {
-      this.$store.dispatch('todolist/init')
-      this.$store.dispatch('config/init')
+      this.$store.dispatch('Todolist/init')
+      this.$store.dispatch('Config/init')
     },
     onSelectToday (filter) {
       this.selectedTodayFilter = filter
@@ -184,7 +184,7 @@ export default {
       this.$router.push(`/todolist/${id}`)
     },
     onSelectHabit (filter) {
-      this.$store.dispatch('habit/changeFilter', filter)
+      this.$store.dispatch('Habit/changeFilter', filter)
     },
     openListDialog () {
       delete this.dialog
@@ -199,7 +199,7 @@ export default {
     },
     editTodolist (listId) {
       delete this.dialog
-      const todolist = this.$store.getters['todolist/getListById'](listId)
+      const todolist = this.$store.getters['Todolist/getListById'](listId)
       this.dialog = new DialogController({
         propsData: {
           parent: this.$root.$el,
@@ -208,13 +208,13 @@ export default {
         }
       })
       this.dialog.$on('add', (todolist) => {
-        this.$store.dispatch('todolist/update', todolist)
+        this.$store.dispatch('Todolist/update', todolist)
       })
       this.dialog.$on('deleteList', () => {
-        this.$store.dispatch('todolist/delete', listId)
+        this.$store.dispatch('Todolist/delete', listId)
           .then(() => {
             // 先頭のリストに遷移
-            const firstListId = this.$store.getters['todolist/getFistListId']
+            const firstListId = this.$store.getters['Todolist/getFistListId']
             this.currentListId = firstListId
             this.$router.push(`/todolist/${firstListId}`)
           })
@@ -229,7 +229,7 @@ export default {
         .then(() => {
           this.$toast.success('新しいプロジェクトを登録しました')
           // 新規作成画面に遷移
-          const listId = this.$store.getters['todo/getCurrentListId']
+          const listId = this.$store.getters['Todo/getCurrentListId']
           this.currentListId = listId
           this.$router.push(`/todolist/${listId}`)
         })
@@ -247,7 +247,7 @@ export default {
         }
       })
       this.inputDialog.$on('update', (message) => {
-        this.$store.dispatch('config/updateMessage', message)
+        this.$store.dispatch('Config/updateMessage', message)
       })
       this.inputDialog.$mount()
     }

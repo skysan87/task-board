@@ -46,13 +46,13 @@ export default {
   computed: {
     filteredTodos: {
       get () {
-        return this.$store.getters['todo/getFilteredTodos']
+        return this.$store.getters['Todo/getFilteredTodos']
       }
     }
   },
   mounted () {
     // 一括で取得する
-    this.$store.dispatch('todo/initTodaylist')
+    this.$store.dispatch('Todo/initTodaylist')
   },
   methods: {
     /**
@@ -61,8 +61,8 @@ export default {
     editTodo (id) {
       delete this.dialog
 
-      const todo = this.$store.getters['todo/getTodoById'](id)
-      const list = this.$store.getters['todolist/getLists']
+      const todo = this.$store.getters['Todo/getTodoById'](id)
+      const list = this.$store.getters['Todolist/getLists']
 
       this.dialog = new DialogController({
         propsData: {
@@ -73,10 +73,10 @@ export default {
         }
       })
       this.dialog.$on('update', (todo) => {
-        this.$store.dispatch('todo/update', todo)
+        this.$store.dispatch('Todo/update', todo)
       })
       this.dialog.$on('delete', (todoId) => {
-        this.$store.dispatch('todo/delete', todoId)
+        this.$store.dispatch('Todo/delete', todoId)
       })
       this.dialog.$mount()
     }

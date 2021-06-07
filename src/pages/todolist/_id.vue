@@ -59,7 +59,7 @@ export default {
   computed: {
     filteredTodos: {
       get () {
-        return this.$store.getters['todo/getFilteredTodos']
+        return this.$store.getters['Todo/getFilteredTodos']
       },
       // eslint-disable-next-line
       set(value) {
@@ -68,12 +68,12 @@ export default {
     },
     editMode: {
       get () {
-        return this.$store.getters['todo/canRemove']
+        return this.$store.getters['Todo/canRemove']
       }
     }
   },
   mounted () {
-    this.$store.dispatch('todo/init', this.$route.params.id)
+    this.$store.dispatch('Todo/init', this.$route.params.id)
   },
   methods: {
     /**
@@ -82,8 +82,8 @@ export default {
     editTodo (id) {
       delete this.dialog
 
-      const todo = this.$store.getters['todo/getTodoById'](id)
-      const list = this.$store.getters['todolist/getLists']
+      const todo = this.$store.getters['Todo/getTodoById'](id)
+      const list = this.$store.getters['Todolist/getLists']
 
       this.dialog = new DialogController({
         propsData: {
@@ -94,10 +94,10 @@ export default {
         }
       })
       this.dialog.$on('update', (todo) => {
-        this.$store.dispatch('todo/update', todo)
+        this.$store.dispatch('Todo/update', todo)
       })
       this.dialog.$on('delete', (todoId) => {
-        this.$store.dispatch('todo/delete', todoId)
+        this.$store.dispatch('Todo/delete', todoId)
       })
       this.dialog.$mount()
     },
@@ -116,7 +116,7 @@ export default {
         oldIndex: ev.oldIndex,
         newIndex: ev.newIndex
       }
-      this.$store.dispatch('todo/changeOrder', params)
+      this.$store.dispatch('Todo/changeOrder', params)
     }
   }
 }
