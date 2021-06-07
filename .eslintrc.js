@@ -11,5 +11,9 @@ module.exports = {
   plugins: [
   ],
   // add your custom rules here
-  rules: {}
+  rules: {
+    'no-lonely-if': 'off',
+    'no-unused-vars': 'off',
+    'dot-notation': 'off'
+  }
 }
