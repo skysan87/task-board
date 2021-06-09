@@ -1,9 +1,15 @@
+import packageInfo from './package.json'
+
 export default {
   ssr: false,
 
   srcDir: 'src',
 
   target: 'static',
+
+  env: {
+    app_version: packageInfo.version
+  },
 
   head: {
     title: 'task-board',
@@ -26,6 +32,8 @@ export default {
   ],
 
   plugins: [
+    { src: '@/plugins/fontawesome', ssr: false },
+    { src: '@/plugins/v-calendar', ssr: false }
   ],
 
   components: true,
