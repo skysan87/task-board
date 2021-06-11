@@ -165,14 +165,12 @@ export const actions = {
     commit('init', { data: [], listId })
   },
 
-  async initTodaylist ({ commit, dispatch, rootGetters }) {
+  async initTodaylist ({ commit, rootGetters }) {
     // 描画初期化
     commit('initToday', { data: [] })
 
     const today = getDateNumber() // YYYYMMDD
     // 1. 今日の習慣を取得
-    // NOTE: /todayは初期ページ
-    await dispatch('Habit/init', null, { root: true })
     const todaysHabits = rootGetters['Habit/getTodayList']
     // 2. 習慣のToDoをサーバーから取得
     const habitTodos = await dao.getHabits(today)
