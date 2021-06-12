@@ -44,7 +44,8 @@ export default {
   ],
 
   modules: [
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/toast'
   ],
 
   axios: {},

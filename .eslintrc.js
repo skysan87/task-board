@@ -14,6 +14,7 @@ module.exports = {
   rules: {
     'no-lonely-if': 'off',
     'no-unused-vars': 'off',
-    'dot-notation': 'off'
+    'dot-notation': 'off',
+    'no-console': 'off'
   }
 }
