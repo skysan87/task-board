@@ -78,6 +78,41 @@ class Db {
   }
 
   /**
+   * 範囲指定で取得
+   * @param {String} storeName テーブル名
+   * @param {String} indexName インデックス名
+   * @param {IDBKeyRange} keyRange 検索条件
+   * @returns Promise<Any[]>
+   */
+  getByKeyRange (storeName, indexName, keyRange) {
+    return new Promise((resolve, reject) => {
+      this.getInstance().then((db) => {
+        try {
+          const tx = db.transaction(storeName, 'readonly')
+          const store = tx.objectStore(storeName)
+          const index = store.index(indexName)
+          const req = index.openCursor(keyRange)
+          const result = []
+          req.onsuccess = () => {
+            if (req.result === null) {
+              resolve(result)
+            } else {
+              const cursor = req.result
+              result.push(cursor.value)
+              cursor.continue()
+            }
+          }
+          req.onerror = () => {
+            reject(req.error)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+  }
+
+  /**
    * 検索キーで一件取得
    * @param {String} storeName テーブル名
    * @param {String} key 検索キー

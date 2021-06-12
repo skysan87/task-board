@@ -1,8 +1,9 @@
 import orderBy from 'lodash/orderBy'
 import { TaskState } from '@/util/TaskState'
-import { CreateTodoDao } from '@/dao'
+import { CreateTodoDao, CreateHabitDao } from '@/dao'
 import { getDateNumber } from '@/util/MomentEx'
 import { Todo } from '@/model/Todo'
+import { Habit } from '~/model/Habit'
 
 const dao = CreateTodoDao()
 
@@ -22,17 +23,21 @@ function getFilteredArray (array, option, isAllSelected) {
 /**
  * 習慣タスクの実績計算
  * @description 完了した場合は実績を更新、完了でなくなった場合は実績を戻す
- * @param {Habit} habit
+ * @param {Habit} habit_
  * @param {Todo} oldTodo
  * @param {Todo} newTodo
- * @return {{Habit, Number}} {habit, habitCounter}
+ * @return {Habit} habit
  */
-function calcHabitSummary (habit, oldTodo, newTodo) {
+function calcHabitSummary (habit_, oldTodo, newTodo) {
+  // NOTE: vuex-store-stateは直接操作禁止のためコピー
+  const habit = new Habit('', {})
+  Object.assign(habit, habit_)
+
   let habitCounter = 0
   let lastActivityDate = oldTodo.lastActivityDate
 
   if (oldTodo.state === newTodo.state) {
-    return { habit, habitCounter }
+    return habit
   }
 
   if (newTodo.state === TaskState.Done.value) {
@@ -50,7 +55,7 @@ function calcHabitSummary (habit, oldTodo, newTodo) {
   habit.duration += habitCounter
   habit.lastActivityDate = lastActivityDate
 
-  return { habit, habitCounter }
+  return habit
 }
 
 export const state = () => ({
@@ -172,7 +177,7 @@ export const actions = {
     const today = getDateNumber() // YYYYMMDD
     // 1. 今日の習慣を取得
     const todaysHabits = rootGetters['Habit/getTodayList']
-    // 2. 習慣のToDoをサーバーから取得
+    // 2. 登録済の習慣のToDoを取得
     const habitTodos = await dao.getHabits(today)
     // 3. 1と2を比較して、2が存在しないものは、追加する
     const missinglist = todaysHabits.reduce((pre, _habit) => {
@@ -180,7 +185,7 @@ export const actions = {
       if (habitTodos.findIndex(v => v.listId === _habit.id) < 0) {
         const todo = new Todo('', {})
         todo.type = 'habit'
-        todo.listId = _habit.id // habitsのサブコレクションのId
+        todo.listId = _habit.id // habitのId
         todo.title = _habit.title
         todo.detail = _habit.detail
         todo.lastActivityDate = _habit.lastActivityDate
@@ -193,8 +198,7 @@ export const actions = {
     }, [])
     // 4. 追加
     if (missinglist.length > 0) {
-      const newhabitToDos = await dao.addHabits(missinglist)
-      habitTodos.push(...newhabitToDos)
+      habitTodos.push(...await dao.addHabits(missinglist))
     }
 
     const todos = []
@@ -297,10 +301,10 @@ export const actions = {
   },
 
   /**
-     * タスクの更新
-     * @param {*} context
-     * @param {Todo} newTodo
-     */
+   * タスクの更新
+   * @param {*} context
+   * @param {Todo} newTodo
+   */
   async update ({ commit, getters, rootGetters }, newTodo) {
     const oldTodo = getters.getTodoById(newTodo.id)
     const stateChanged = oldTodo.state !== newTodo.state
@@ -313,23 +317,24 @@ export const actions = {
         // ステータス以外は変更できないため、更新しない
         return
       }
-      const habit = rootGetters['habit/getById'](newTodo.listId)
-      const { habit: updatedHabit, habitCounter } = calcHabitSummary(habit, oldTodo, newTodo)
+      const habit = rootGetters['Habit/getById'](newTodo.listId)
+      const updatedHabit = calcHabitSummary(habit, oldTodo, newTodo)
 
-      if (await dao.updateHabit(newTodo, updatedHabit, habitCounter)) {
-        commit('update', newTodo)
-        commit('habit/update', updatedHabit, { root: true })
-      }
+      await dao.update(newTodo)
+      await CreateHabitDao().update(updatedHabit)
+
+      commit('update', newTodo)
+      commit('Habit/update', updatedHabit, { root: true })
     } else if (await dao.update(newTodo)) {
       commit('update', newTodo)
     }
   },
 
   /**
-     * タスクのステータス更新
-     * @param {*} context
-     * @param {String} id Todo.id
-     */
+   * タスクのステータス更新
+   * @param {*} context
+   * @param {String} id Todo.id
+   */
   async changeState ({ commit, state, rootGetters }, id) {
     const index = state.todos.findIndex(v => v.id === id)
     if (index < 0) {
@@ -354,13 +359,14 @@ export const actions = {
     newTodo.stateChangeDate = getDateNumber()
 
     if (newTodo.type === 'habit') {
-      const habit = rootGetters['habit/getById'](newTodo.listId)
-      const { habit: updatedHabit, habitCounter } = calcHabitSummary(habit, oldTodo, newTodo)
+      const habit = rootGetters['Habit/getById'](newTodo.listId)
+      const updatedHabit = calcHabitSummary(habit, oldTodo, newTodo)
 
-      if (await dao.updateHabit(newTodo, updatedHabit, habitCounter)) {
-        commit('update', newTodo)
-        commit('habit/update', updatedHabit, { root: true })
-      }
+      await dao.update(newTodo)
+      await CreateHabitDao().update(updatedHabit)
+
+      commit('update', newTodo)
+      commit('Habit/update', updatedHabit, { root: true })
     } else if (await dao.update(newTodo)) {
       commit('update', newTodo)
     }
