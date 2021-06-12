@@ -82,9 +82,7 @@ export default {
       this.dialog = new DialogController({
         propsData: {
           parent: this.$root.$el,
-          target: new Habit('', {
-            rootId: this.$store.getters['Habit/getRootId']
-          }),
+          target: new Habit('', {}),
           isCreateMode: true
         }
       })
