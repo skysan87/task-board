@@ -59,14 +59,14 @@ export class TodoDao {
 
   /**
    * タスクの登録
-   * @param {String} listId リストID
    * @param {Object} params パラメータ
    * @returns
    */
-  async add (listId, params) {
+  async add (params) {
     const now = new Date()
     const todo = new Todo(now.getTime().toString(), params)
-    todo.listId = listId
+    todo.updatedAt = now
+    todo.createdAt = now
 
     const result = await db.insert(STORE_NAME, todo.getData())
 

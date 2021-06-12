@@ -62,7 +62,8 @@ export const state = () => ({
   todos: [],
   selectedState: [TaskState.Todo.value, TaskState.InProgress.value],
   canRemove: false,
-  listId: ''
+  listId: '',
+  maxIndex: 0
 })
 
 export const getters = {
@@ -107,6 +108,13 @@ export const getters = {
 
   size: (state) => {
     return state.todos.length
+  },
+
+  maxIndex: (state) => {
+    return Math.max.apply(
+      null,
+      state.todos.map(e => e.orderIndex)
+    )
   }
 }
 
@@ -125,6 +133,7 @@ export const mutations = {
 
   add (state, payload) {
     state.todos.push(payload)
+    state.maxIndex += 1
   },
 
   delete (state, id) {
@@ -215,9 +224,6 @@ export const actions = {
 
   async changeOrder ({ commit, getters }, params) {
     const filtered = getters.getFilteredTodos
-    // let srcTodo, destTodo
-    // Object.assign(srcTodo, filtered[params.oldIndex])
-    // Object.assign(destTodo, filtered[params.newIndex])
 
     const srcTodo = filtered[params.oldIndex]
     const destTodo = filtered[params.newIndex]
@@ -247,7 +253,6 @@ export const actions = {
     }
 
     // NOTE: 並び替えは前後のorderから算出
-    //  firebaseで複雑なsortができないため
     const newOrderIndex = (prevOrderIndex + nextOrderIndex) / 2
 
     if (newOrderIndex !== destTodo.orderIndex) {
@@ -275,23 +280,21 @@ export const actions = {
     commit('switchEdit')
   },
 
-  add ({ commit, state, getters }, params) {
-    return new Promise((resolve, reject) => {
-      if (getters.size + 1 > MAX_SIZE) {
-        reject(new Error('これ以上登録できません'))
-        return
-      }
-      params.stateChangeDate = getDateNumber()
-      dao.add(state.listId, params)
-        .then((result) => {
-          if (result.isSuccess) {
-            commit('add', result.value)
-            resolve()
-          } else {
-            reject(new Error('登録に失敗しました'))
-          }
-        })
-    })
+  async add ({ commit, state, getters }, params) {
+    if (getters.size + 1 > MAX_SIZE) {
+      throw new Error('これ以上登録できません')
+    }
+
+    params.listId = state.listId
+    params.stateChangeDate = getDateNumber()
+    params.orderIndex = getters.size > 0 ? getters.maxIndex + 1 : 1
+    const result = await dao.add(params)
+
+    if (result.isSuccess) {
+      commit('add', result.value)
+    } else {
+      throw new Error('登録に失敗しました')
+    }
   },
 
   async delete ({ commit }, id) {
