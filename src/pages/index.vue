@@ -4,8 +4,6 @@
 
 <script>
 export default {
-  mounted () {
-    this.$router.push('today/list')
-  }
+  layout: 'board'
 }
 </script>

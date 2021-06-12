@@ -8,7 +8,6 @@ export class Habit {
 
   constructor (id, params) {
     this.id = id
-    this.rootId = params.rootId
     this.title = params.title || null
     this.detail = params.detail || null
     this.isActive = (params.isActive !== undefined) ? params.isActive : true
@@ -55,9 +54,9 @@ export class Habit {
   }
 
   getData () {
-    const params = {
+    return {
+      id: this.id,
       title: this.title,
-      rootId: this.rootId,
       detail: this.detail,
       isActive: this.isActive,
       frequency: this.frequency,
@@ -74,7 +73,6 @@ export class Habit {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     }
-    return params
   }
 
   /**

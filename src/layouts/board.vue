@@ -114,6 +114,7 @@ import NewListDialog from '@/components/NewListDialog'
 import InputDialog from '@/components/InputDialog'
 import { HabitFilter } from '@/util/HabitFilter'
 import { TodayFilter } from '@/util/TodayFilter'
+import Db from '@/plugins/db'
 
 const DialogController = Vue.extend(NewListDialog)
 const InputDialogController = Vue.extend(InputDialog)
@@ -126,7 +127,7 @@ export default {
       habitFilters: Object.values(HabitFilter),
       todayFilters: Object.values(TodayFilter),
       viewType,
-      selectedTodayFilter: TodayFilter.List.value,
+      selectedTodayFilter: '',
       activeItemId: '',
       dialog: null,
       inputDialog: null,
@@ -167,14 +168,14 @@ export default {
       }
     }
   },
-  mounted () {
-    this.init()
+  async mounted () {
+    await Db.init()
+    await this.$store.dispatch('Config/init')
+    await this.$store.dispatch('Habit/init')
+    await this.$store.dispatch('Todolist/init')
+    // TODO: 選択されている: selectedTodayFilter
   },
   methods: {
-    init () {
-      this.$store.dispatch('Todolist/init')
-      this.$store.dispatch('Config/init')
-    },
     onSelectToday (filter) {
       this.selectedTodayFilter = filter
       this.$router.push(`/today/${filter}`)
@@ -225,7 +226,7 @@ export default {
       this.dialog.$mount()
     },
     addList (todolist) {
-      this.$store.dispatch('todolist/add', todolist.getData())
+      this.$store.dispatch('Todolist/add', todolist.getData())
         .then(() => {
           this.$toast.success('新しいプロジェクトを登録しました')
           // 新規作成画面に遷移

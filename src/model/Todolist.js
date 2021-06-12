@@ -10,7 +10,8 @@ export class Todolist {
   }
 
   getData () {
-    const params = {
+    return {
+      id: this.id,
       title: this.title,
       detail: this.detail,
       deleteFlag: false,
@@ -19,6 +20,5 @@ export class Todolist {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     }
-    return params
   }
 }

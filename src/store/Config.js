@@ -15,30 +15,34 @@ export const getters = {
 
 export const mutations = {
   init (state, config) {
-    Object.assign(state.config, config)
+    state.config = config
   },
 
   update (state, config) {
-    Object.assign(state.config, config)
+    state.config = config
   }
 }
 
 export const actions = {
   async init ({ commit }) {
-    const configList = await dao.get()
+    try {
+      const configList = await dao.get()
 
-    let config
+      let config = null
 
-    if (configList.length > 0) {
-      config = configList[0]
-    } else {
-      const result = await dao.add()
-      if (result.isSuccess) {
-        config = result.value
+      if (configList.length > 0) {
+        config = configList[0]
+      } else {
+        const result = await dao.add()
+        if (result.isSuccess) {
+          config = result.value
+        }
       }
-    }
 
-    commit('init', config)
+      commit('init', config)
+    } catch (error) {
+      console.error(error)
+    }
 
     console.log('config init')
   },

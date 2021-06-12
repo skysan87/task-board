@@ -23,7 +23,8 @@ export class Todo {
   }
 
   getData () {
-    const params = {
+    return {
+      id: this.id,
       title: this.title,
       type: this.type,
       state: this.state,
@@ -38,6 +39,5 @@ export class Todo {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     }
-    return params
   }
 }

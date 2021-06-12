@@ -8,8 +8,8 @@ const MAX_SIZE = process.env.MAX_SIZE_HABIT || 7
 
 export const state = () => ({
   habits: [],
-  rootId: '',
-  filterId: HabitFilter.Today.value
+  filterId: HabitFilter.Today.value,
+  maxIndex: 0
 })
 
 export const getters = {
@@ -44,19 +44,22 @@ export const getters = {
     return state.filterId
   },
 
-  getRootId: (state) => {
-    return state.rootId
-  },
-
   size: (state) => {
     return state.habits.length
   }
 }
 
 export const mutations = {
-  init (state, params) {
-    state.rootId = params.rootId
-    state.habits = params.habits
+  init (state, habits) {
+    state.habits = habits
+
+    if (habits !== null && habits.length > 0) {
+      // リストはそれほど増えないので、毎回計算する
+      state.maxIndex = Math.max.apply(
+        null,
+        habits.map(e => e.orderIndex)
+      )
+    }
   },
 
   add (state, habit) {
@@ -80,37 +83,25 @@ export const mutations = {
 
 export const actions = {
   async init ({ commit }) {
-    const info = await dao.getInfo()
+    const habits = await dao.get()
 
-    if (info.length > 0) {
-      const habitlist = info[0]
-      const habits = await dao.get(habitlist.id)
-      habits.forEach((h) => {
-        h.updateSummary()
-      })
+    habits.forEach((h) => {
+      h.updateSummary()
+    })
 
-      // server update
+    // server update
+    if (habits.length > 0) {
       await dao.updateSummary(habits)
-
-      commit('init',
-        {
-          habits,
-          rootId: habitlist.id
-        })
-    } else {
-      // Add First List
-      const result = await dao.addInfo()
-      if (result.isSuccess) {
-        commit('init', {
-          habits: [],
-          rootId: result.value.id
-        })
-      }
     }
+
+    commit('init', habits)
+
     console.log('habit init')
   },
 
-  add ({ commit, getters }, params) {
+  add ({ commit, getters, state }, params) {
+    params.orderIndex = state.maxIndex + 1
+
     return new Promise((resolve, reject) => {
       if (getters.size + 1 > MAX_SIZE) {
         reject(new Error('これ以上登録できません'))
@@ -134,7 +125,7 @@ export const actions = {
   },
 
   async delete ({ commit }, habit) {
-    if (await dao.delete(habit)) {
+    if (await dao.delete(habit.id)) {
       commit('delete', habit.id)
     }
   },
