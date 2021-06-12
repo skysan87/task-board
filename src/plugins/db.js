@@ -210,10 +210,10 @@ class Db {
             store.put(data)
           })
           tx.onerror = () => {
-            reject(new Error(tx.error))
+            reject(tx.error)
           }
           tx.oncomplete = () => {
-            resolve(null)
+            resolve(true)
           }
         } catch (error) {
           reject(error)
@@ -240,6 +240,34 @@ class Db {
           }
           req.onerror = () => {
             reject(req.error)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+  }
+
+  /**
+   * データ削除
+   * @param {String} storeName テーブル名
+   * @param {String[]} keys 削除するキー配列
+   * @returns Promise<Boolean>
+   */
+  deleteAll (storeName, keys) {
+    return new Promise((resolve, reject) => {
+      this.getInstance().then((db) => {
+        try {
+          const tx = db.transaction(storeName, 'readwrite')
+          const store = tx.objectStore(storeName)
+          keys.forEach((key) => {
+            store.delete(key)
+          })
+          tx.onerror = () => {
+            reject(tx.error)
+          }
+          tx.oncomplete = () => {
+            resolve(true)
           }
         } catch (error) {
           reject(error)

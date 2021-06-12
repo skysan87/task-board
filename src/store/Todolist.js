@@ -1,5 +1,5 @@
 import orderBy from 'lodash/orderBy'
-import { CreateTodolistDao } from '@/dao'
+import { CreateTodolistDao, CreateTodoDao } from '@/dao'
 import { Todolist } from '@/model/Todolist'
 
 const dao = CreateTodolistDao()
@@ -108,19 +108,22 @@ export const actions = {
     }
   },
 
-  delete ({ commit, state }, id) {
-    return new Promise((resolve, reject) => {
-      if (state.lists.length <= 1) {
-        reject(new Error('これ以上削除できません'))
-        return
-      }
+  async delete ({ commit, state }, id) {
+    if (state.lists.length <= 1) {
+      throw new Error('これ以上削除できません')
+    }
 
-      if (dao.delete(id)) {
-        commit('delete', id)
-        resolve()
-      } else {
-        reject(new Error('削除できませんでした'))
-      }
-    })
+    try {
+      await dao.delete(id)
+
+      const todoDao = CreateTodoDao()
+      const todos = await todoDao.getTodos(id)
+      await todoDao.deleteTodos(todos)
+
+      commit('delete', id)
+    } catch (error) {
+      console.error(error)
+      throw new Error('削除できませんでした')
+    }
   }
 }

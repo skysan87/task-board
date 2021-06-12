@@ -257,7 +257,8 @@ export const actions = {
   },
 
   async deleteDone ({ commit, state }) {
-    if (await dao.deleteTodos(state.todos, TaskState.Done)) {
+    const doneTodo = getFilteredArray(state.todos, [TaskState.Done.value], false)
+    if (await dao.deleteTodos(doneTodo)) {
       commit('deleteDone')
     }
   },

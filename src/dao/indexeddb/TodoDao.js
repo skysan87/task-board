@@ -130,10 +130,13 @@ export class TodoDao {
     return await db.delete(STORE_NAME, id)
   }
 
-  deleteTodos (todos, taskState) {
-    // TODO:
-    return new Promise((resolve) => {
-      resolve(true)
-    })
+  /**
+   * 一括削除
+   * @param {Todo[]} todos
+   * @returns
+   */
+  async deleteTodos (todos) {
+    const idlist = todos.map(v => v.id)
+    return await db.deleteAll(STORE_NAME, idlist)
   }
 }
