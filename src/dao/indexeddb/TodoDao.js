@@ -84,7 +84,7 @@ export class TodoDao {
   async addHabits (todos) {
     const data = []
     for (let i = 0; i < todos.length; i++) {
-      todos[i].id = (Date.now() + i).toString()
+      todos[i].id = 'H-' + Date.now().toString()
       data.push(todos[i].getData())
     }
     await db.updateAll(STORE_NAME, data)
