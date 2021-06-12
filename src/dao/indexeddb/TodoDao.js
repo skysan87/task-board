@@ -24,11 +24,11 @@ export class TodoDao {
   async getTodaysTask (date) {
     const tasks = []
 
-    const todokey = IDBKeyRange.bound(['todo', TaskState.Todo.value], ['todo', TaskState.Todo.value, date])
+    const todokey = IDBKeyRange.bound([Todo.TYPE_TODO, TaskState.Todo.value], [Todo.TYPE_TODO, TaskState.Todo.value, date])
     const todos = await db.getByKeyRange(STORE_NAME, 'today_todo', todokey)
     tasks.push(...todos.map(v => new Todo(v.id, v)))
 
-    const ipkey = IDBKeyRange.bound(['todo', TaskState.InProgress.value], ['todo', TaskState.InProgress.value, date])
+    const ipkey = IDBKeyRange.bound([Todo.TYPE_TODO, TaskState.InProgress.value], [Todo.TYPE_TODO, TaskState.InProgress.value, date])
     const ips = await db.getByKeyRange(STORE_NAME, 'today_todo', ipkey)
     tasks.push(...ips.map(v => new Todo(v.id, v)))
 
@@ -41,7 +41,7 @@ export class TodoDao {
    * @returns {Promise<Todo[]>} 習慣のタスク
    */
   async getTodaysDone (date) {
-    const key = IDBKeyRange.only(['todo', TaskState.Done.value, date])
+    const key = IDBKeyRange.only([Todo.TYPE_TODO, TaskState.Done.value, date])
     const result = await db.getByKeyRange(STORE_NAME, 'done_todo', key)
     return result.map(v => new Todo(v.id, v))
   }
@@ -52,7 +52,7 @@ export class TodoDao {
    * @returns {Promise<Todo[]>}
    */
   async getHabits (date) {
-    const key = IDBKeyRange.only(['habit', date])
+    const key = IDBKeyRange.only([Todo.TYPE_HABIT, date])
     const result = await db.getByKeyRange(STORE_NAME, 'habit_todo', key)
     return result.map(v => new Todo(v.id, v))
   }
