@@ -182,7 +182,7 @@ export default {
   },
   computed: {
     isTypeTodo () {
-      return todo.type === Todo.TYPE_TODO
+      return this.todo.type === Todo.TYPE_TODO
     }
   },
   mounted () {
