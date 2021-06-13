@@ -15,7 +15,7 @@
           </div>
         </div>
 
-        <div v-if="todo.type === 'todo'" class="modal-body">
+        <div v-if="isTypeTodo" class="modal-body">
           <label class="input-label">プロジェクト</label>
           <select v-model="todo.listId" class="input-text">
             <option v-for="list in projectList" :key="list.id" :value="list.id">
@@ -180,6 +180,11 @@ export default {
       }]
     }
   },
+  computed: {
+    isTypeTodo () {
+      return this.todo.type === Todo.TYPE_TODO
+    }
+  },
   mounted () {
     this.parent.appendChild(this.$el)
     this.$nextTick(() => {
@@ -202,10 +207,8 @@ export default {
         end: this.todo.enddate !== null ? moment(this.todo.enddate.toString()).toDate() : null
       }
 
-      // TODO: プロジェクトリストの読み込み
-
       // 編集の禁止
-      if (this.todo.type === 'habit') {
+      if (this.todo.type === Todo.TYPE_HABIT) {
         this.forbid.title = true
         this.forbid.detail = true
         this.forbid.range = true

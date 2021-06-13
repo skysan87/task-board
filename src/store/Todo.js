@@ -3,7 +3,7 @@ import { TaskState } from '@/util/TaskState'
 import { CreateTodoDao, CreateHabitDao } from '@/dao'
 import { getDateNumber } from '@/util/MomentEx'
 import { Todo } from '@/model/Todo'
-import { Habit } from '~/model/Habit'
+import { Habit } from '@/model/Habit'
 
 const dao = CreateTodoDao()
 
@@ -193,7 +193,7 @@ export const actions = {
       // Habit.id === Todo.listId
       if (habitTodos.findIndex(v => v.listId === _habit.id) < 0) {
         const todo = new Todo('', {})
-        todo.type = 'habit'
+        todo.type = Todo.TYPE_HABIT
         todo.listId = _habit.id // habitのId
         todo.title = _habit.title
         todo.detail = _habit.detail
@@ -315,7 +315,7 @@ export const actions = {
       newTodo.stateChangeDate = getDateNumber()
     }
 
-    if (newTodo.type === 'habit') {
+    if (newTodo.type === Todo.TYPE_HABIT) {
       if (!stateChanged) {
         // ステータス以外は変更できないため、更新しない
         return
@@ -361,7 +361,7 @@ export const actions = {
     }
     newTodo.stateChangeDate = getDateNumber()
 
-    if (newTodo.type === 'habit') {
+    if (newTodo.type === Todo.TYPE_HABIT) {
       const habit = rootGetters['Habit/getById'](newTodo.listId)
       const updatedHabit = calcHabitSummary(habit, oldTodo, newTodo)
 
