@@ -90,4 +90,7 @@ sw.*
 # Vim swap files
 *.swp
 
+# electron-builder
+build
+
 Note.md
