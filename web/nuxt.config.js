@@ -1,6 +1,8 @@
 import packageInfo from './package.json'
 
-export default {
+console.log('Environment: ', process.env.NODE_ENV)
+
+const devConfig = {
   ssr: false,
 
   srcDir: 'src',
@@ -57,3 +59,26 @@ export default {
     duration: 3000
   }
 }
+
+const prodConfig = {
+  ...devConfig,
+
+  router: {
+    ...devConfig.router,
+    base: './',
+    mode: 'hash'
+  },
+
+  generate: {
+    ...devConfig.generate,
+    dir: '../app/dist',
+  },
+
+  build: {
+    ...devConfig.build
+  }
+}
+
+const config = process.env.NODE_ENV === 'production' ? prodConfig : devConfig
+
+export default config
