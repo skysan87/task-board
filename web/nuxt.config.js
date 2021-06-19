@@ -71,7 +71,7 @@ const prodConfig = {
 
   generate: {
     ...devConfig.generate,
-    dir: '../app/dist',
+    dir: '../app/dist'
   },
 
   build: {
