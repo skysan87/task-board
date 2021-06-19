@@ -8,7 +8,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
  * @param {string | number | Date | undefined} date
  * @param {string} format
  */
-export const dayFactory = (date = null, format) => {
+export const dateFactory = (date = null, format) => {
   return new Wrapper(date, format)
 }
 

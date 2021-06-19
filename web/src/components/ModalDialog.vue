@@ -137,7 +137,7 @@
 import isEmpty from 'lodash/isEmpty'
 import { TaskState } from '@/util/TaskState'
 import { Todo } from '@/model/Todo'
-import { dayFactory } from '@/util/DayFactory'
+import { dateFactory } from '@/util/DateFactory'
 
 export default {
   name: 'ModalDialog',
@@ -202,8 +202,8 @@ export default {
         Object.assign(this.todo, this.target)
       }
       this.range = {
-        start: this.todo.startdate !== null ? dayFactory(this.todo.startdate.toString()).toDate() : null,
-        end: this.todo.enddate !== null ? dayFactory(this.todo.enddate.toString()).toDate() : null
+        start: this.todo.startdate !== null ? dateFactory(this.todo.startdate.toString()).toDate() : null,
+        end: this.todo.enddate !== null ? dateFactory(this.todo.enddate.toString()).toDate() : null
       }
 
       // 編集の禁止
@@ -226,8 +226,8 @@ export default {
           this.todo.startdate = null
           this.todo.enddate = null
         } else {
-          this.todo.startdate = dayFactory(this.range.start).getDateNumber()
-          this.todo.enddate = dayFactory(this.range.end).getDateNumber()
+          this.todo.startdate = dateFactory(this.range.start).getDateNumber()
+          this.todo.enddate = dateFactory(this.range.end).getDateNumber()
         }
         if (this.isCreateMode) {
           this.$emit('add', this.todo)

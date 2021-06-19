@@ -37,7 +37,7 @@ import Vue from 'vue'
 import isEmpty from 'lodash/isEmpty'
 import ModalDialog from '@/components/ModalDialog.vue'
 import { Todo } from '@/model/Todo'
-import { dayFactory } from '@/util/DayFactory'
+import { dateFactory } from '@/util/DateFactory'
 
 const DialogController = Vue.extend(ModalDialog)
 
@@ -102,10 +102,10 @@ export default {
       let deadline = null
       switch (this.checkedDeadline) {
         case 'today':
-          deadline = dayFactory().getDateNumber()
+          deadline = dateFactory().getDateNumber()
           break
         case 'tomorrow':
-          deadline = dayFactory().addDay(1).getDateNumber()
+          deadline = dateFactory().addDay(1).getDateNumber()
           break
         default:
           deadline = null
