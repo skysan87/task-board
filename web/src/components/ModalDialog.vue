@@ -134,11 +134,10 @@
 </template>
 
 <script>
-import moment from 'moment'
 import isEmpty from 'lodash/isEmpty'
 import { TaskState } from '@/util/TaskState'
 import { Todo } from '@/model/Todo'
-import { getDateNumber } from '@/util/MomentEx'
+import { dayFactory } from '@/util/DayFactory'
 
 export default {
   name: 'ModalDialog',
@@ -203,8 +202,8 @@ export default {
         Object.assign(this.todo, this.target)
       }
       this.range = {
-        start: this.todo.startdate !== null ? moment(this.todo.startdate.toString()).toDate() : null,
-        end: this.todo.enddate !== null ? moment(this.todo.enddate.toString()).toDate() : null
+        start: this.todo.startdate !== null ? dayFactory(this.todo.startdate.toString()).toDate() : null,
+        end: this.todo.enddate !== null ? dayFactory(this.todo.enddate.toString()).toDate() : null
       }
 
       // 編集の禁止
@@ -227,8 +226,8 @@ export default {
           this.todo.startdate = null
           this.todo.enddate = null
         } else {
-          this.todo.startdate = getDateNumber(moment(this.range.start))
-          this.todo.enddate = getDateNumber(moment(this.range.end))
+          this.todo.startdate = dayFactory(this.range.start).getDateNumber()
+          this.todo.enddate = dayFactory(this.range.end).getDateNumber()
         }
         if (this.isCreateMode) {
           this.$emit('add', this.todo)

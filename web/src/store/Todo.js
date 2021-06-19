@@ -1,7 +1,7 @@
 import orderBy from 'lodash/orderBy'
 import { TaskState } from '@/util/TaskState'
 import { CreateTodoDao, CreateHabitDao } from '@/dao'
-import { getDateNumber } from '@/util/MomentEx'
+import { dayFactory } from '@/util/DayFactory'
 import { Todo } from '@/model/Todo'
 import { Habit } from '@/model/Habit'
 
@@ -42,7 +42,7 @@ function calcHabitSummary (habit_, oldTodo, newTodo) {
 
   if (newTodo.state === TaskState.Done.value) {
     habitCounter = 1
-    lastActivityDate = getDateNumber()
+    lastActivityDate = dayFactory().getDateNumber()
   } else if (oldTodo.state === TaskState.Done.value) {
     // Doneから変更された場合はリセット
     habitCounter = -1
@@ -183,7 +183,7 @@ export const actions = {
     // 描画初期化
     commit('initToday', { data: [] })
 
-    const today = getDateNumber() // YYYYMMDD
+    const today = dayFactory().getDateNumber() // YYYYMMDD
     // 1. 今日の習慣を取得
     const todaysHabits = rootGetters['Habit/getTodayList']
     // 2. 登録済の習慣のToDoを取得
@@ -286,7 +286,7 @@ export const actions = {
     }
 
     params.listId = state.listId
-    params.stateChangeDate = getDateNumber()
+    params.stateChangeDate = dayFactory().getDateNumber()
     params.orderIndex = getters.size > 0 ? getters.maxIndex + 1 : 1
     const result = await dao.add(params)
 
@@ -312,7 +312,7 @@ export const actions = {
     const oldTodo = getters.getTodoById(newTodo.id)
     const stateChanged = oldTodo.state !== newTodo.state
     if (stateChanged) {
-      newTodo.stateChangeDate = getDateNumber()
+      newTodo.stateChangeDate = dayFactory().getDateNumber()
     }
 
     if (newTodo.type === Todo.TYPE_HABIT) {
@@ -359,7 +359,7 @@ export const actions = {
         newTodo.state = TaskState.Todo.value
         break
     }
-    newTodo.stateChangeDate = getDateNumber()
+    newTodo.stateChangeDate = dayFactory().getDateNumber()
 
     if (newTodo.type === Todo.TYPE_HABIT) {
       const habit = rootGetters['Habit/getById'](newTodo.listId)

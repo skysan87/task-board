@@ -1,13 +1,4 @@
-import moment from 'moment'
-
-/**
- * 日付を数値型で取得
- * @returns {Number} 日付（YYYYMMDD)
- */
-export function getDateNumber (_momoent = null) {
-  const _m = _momoent || moment()
-  return parseInt(_m.format('YYYYMMDD'))
-}
+import dayjs from 'dayjs'
 
 /**
  * 指定した期間のループ処理(昇順)
@@ -16,33 +7,31 @@ export function getDateNumber (_momoent = null) {
  * @param {Function} _callback コールバック
  */
 export function forDayEach (startDate, endDate, _callback) {
-  const start = moment(startDate)
-  const end = moment(endDate)
+  const start = dayjs(startDate)
+  const end = dayjs(endDate)
 
-  while (start.unix() <= end.unix()) {
-    const cancel = _callback(start.toDate())
+  for (let date = start; date <= end; date = date.add(1, 'day')) {
+    const cancel = _callback(date.toDate())
     if (cancel) {
       break
     }
-    start.add(1, 'days')
   }
 }
 
 /**
- * 指定した期間のループ処理(光順)
+ * 指定した期間のループ処理(降順)
  * @param {Date} startDate 開始日
  * @param {Date} endDate 終了日
  * @param {Function} _callback コールバック
  */
 export function forDayReverseEach (startDate, endDate, _callback) {
-  const start = moment(startDate)
-  const end = moment(endDate)
+  const start = dayjs(startDate)
+  const end = dayjs(endDate)
 
-  while (start.unix() <= end.unix()) {
-    const cancel = _callback(end.toDate())
+  for (let date = end; start <= date; date = date.subtract(1, 'day')) {
+    const cancel = _callback(date.toDate())
     if (cancel) {
       break
     }
-    end.subtract(1, 'days')
   }
 }

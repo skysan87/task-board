@@ -36,10 +36,10 @@
 
 <script>
 import Vue from 'vue'
-import moment from 'moment'
 import ModalDialog from '@/components/ModalDialog.vue'
 import { getStateColor } from '@/util/StateColor'
 import { forDayEach } from '@/util/MomentEx.js'
+import { dayFactory } from '@/util/DayFactory'
 
 const DialogController = Vue.extend(ModalDialog)
 
@@ -60,8 +60,8 @@ export default {
 
         return todos.filter(t => t.startdate !== null && t.enddate !== null)
           .map((t) => {
-            const start = moment(t.startdate.toString()).toDate()
-            const end = moment(t.enddate.toString()).toDate()
+            const start = dayFactory(t.startdate.toString()).toDate()
+            const end = dayFactory(t.enddate.toString()).toDate()
             const duration = []
             forDayEach(start, end, (target) => {
               duration.push(target)

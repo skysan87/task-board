@@ -1,5 +1,5 @@
-import moment from 'moment'
-import { forDayEach, forDayReverseEach, getDateNumber } from '@/util/MomentEx.js'
+import { forDayEach, forDayReverseEach } from '@/util/MomentEx.js'
+import { dayFactory } from '@/util/DayFactory'
 
 export class Habit {
   static FREQ_DAILY = 'daily'
@@ -95,9 +95,10 @@ export class Habit {
     if (this.isActive === false) {
       return
     }
-    if (this.summaryUpdatedAt === null || this.summaryUpdatedAt < getDateNumber()) {
+    const dateNumber = dayFactory().getDateNumber()
+    if (this.summaryUpdatedAt === null || this.summaryUpdatedAt < dateNumber) {
       this.calcSummary()
-      this.summaryUpdatedAt = getDateNumber()
+      this.summaryUpdatedAt = dateNumber
       this.needServerUpdate = true
     } else {
       this.needServerUpdate = false
@@ -128,7 +129,7 @@ export class Habit {
 
     // 実施予定日を計算
     if (!firstCalc) {
-      const lastUpdate = moment(this.summaryUpdatedAt, 'YYYYMMDD').add(1, 'days').toDate()
+      const lastUpdate = dayFactory(this.summaryUpdatedAt.toString(), 'YYYYMMDD').addDay(1).toDate()
       // 最終更新日の翌日から今日まで
       forDayEach(lastUpdate, today, (targetDate) => {
         if (this.calcPlanFlag(unzipPlan, targetDate)) {
