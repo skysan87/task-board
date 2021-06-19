@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "MODE=dev electron .",
     "start": "electron .",
-    "build:renderer": "(cd src/renderer; npm run build-as-app)",
     "build:mac": "electron-builder --mac --x64 --dir"
   },
   "build": {
