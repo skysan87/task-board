@@ -129,7 +129,7 @@ export class Habit {
 
     // 実施予定日を計算
     if (!firstCalc) {
-      const lastUpdate = dayFactory(this.summaryUpdatedAt.toString(), 'YYYYMMDD').addDay(1).toDate()
+      const lastUpdate = dayFactory(this.summaryUpdatedAt.toString()).addDay(1).toDate()
       // 最終更新日の翌日から今日まで
       forDayEach(lastUpdate, today, (targetDate) => {
         if (this.calcPlanFlag(unzipPlan, targetDate)) {
