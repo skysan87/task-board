@@ -25,8 +25,7 @@ Nuxt.js(Webアプリ)のデスクトップ化(Electron)
 │   ├── node_modules  ・・・Electronプロジェクトのモジュール
 │   ├── package.json
 │   └── src
-│       ├── main                  ・・・mainプロセス群
-│       └── renderer -> ../../web ・・・rendererプロセス群 - Nuxt.jsプロジェクトへのリンク
+│       └── main                  ・・・mainプロセス群
 └── web
     ├── (Nuxt.jsの規定フォルダ群)
     ├── node_modules  ・・・Nuxt.jsプロジェクトのモジュール
@@ -57,21 +56,12 @@ $ npm run dev
 # ↑(ローカルサーバ) + electron開発時(appフォルダ)
 $ npm run dev
 
-# nuxt generate & electron実行(appフォルダ)
-$ npm run build:renderer
+# nuxt generate(webフォルダ)
+$ npm run build-as-app
+# electron実行(appフォルダ)
 $ npm run start
 
-# electron 実行ファイル作成(Macの場合)
-$ npm run build:renderer
+# electron 実行ファイル作成(appフォルダ)
+# Mac
 $ npm run build:mac
-```
-
-
-## 補足
-
-* シンボリックリンク設定
-
-```bash
-$ cd app/src
-$ ln -s ../../web renderer
 ```
