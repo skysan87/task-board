@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS config
+(
+  id TEXT PRIMARY KEY,
+  data JSON
+);
+
+CREATE TABLE IF NOT EXISTS habit
+(
+  id TEXT PRIMARY KEY,
+  data JSON
+);
+
+CREATE TABLE IF NOT EXISTS todolist
+(
+  id TEXT PRIMARY KEY,
+  data JSON
+);
+
+CREATE TABLE IF NOT EXISTS todo
+(
+  id TEXT PRIMARY KEY,
+  data JSON
+);
