@@ -41,7 +41,8 @@ const devConfig = {
   components: true,
 
   buildModules: [
-    '@nuxt/typescript-build',
+    // NOTE: tsファイルがないエラー回避
+    // '@nuxt/typescript-build',
     '@nuxtjs/tailwindcss'
   ],
 

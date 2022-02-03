@@ -8,7 +8,8 @@
     "build:mac": "electron-builder --mac --x64 --dir"
   },
   "build": {
-    "appId": "com.nuxt-electron-sample.app",
+    "appId": "com.task-board.app",
+    "productName": "task-board",
     "files": [
       "dist",
       "src"
