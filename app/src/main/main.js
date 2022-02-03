@@ -16,7 +16,7 @@ async function createWindow () {
     }
   })
 
-  if (process.env.MODE === 'dev') {
+  if (process.env.NODE_ENV === 'dev') {
     win.loadURL('http://localhost:3000/')
 
     win.webContents.openDevTools()
