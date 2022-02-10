@@ -27,4 +27,9 @@ const todo = {
   ]
 }
 
-export default [config, habit, todolist, todo]
+const event = {
+  name: 'event',
+  indexes: []
+}
+
+export default [config, habit, todolist, todo, event]

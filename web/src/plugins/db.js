@@ -1,7 +1,7 @@
 import definition from '@/plugins/store-definition'
 
 const DB_NAME = 'todolist'
-const DB_VERSION = 1
+const DB_VERSION = 2 // NOTE: 定義を更新したらインクリメントする
 
 let _db = null
 
@@ -57,7 +57,7 @@ class Db {
 
       // DBのバージョン更新時
       req.onupgradeneeded = () => {
-        console.log('database upgradeneeded.')
+        console.log('database upgrade needed.')
         const db = req.result
         this.createStore(db)
         // NOTE: 正常終了すると、onsuccessイベントが実行
