@@ -38,7 +38,7 @@
                   @mousedown.prevent="mouseDownMove($event, t)"
                 >
                   <div class="flex w-full">
-                    <div class="select-none flex-1 no-wrap text-left px-1">
+                    <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
                       {{ t.name }}
                     </div>
                     <div class="flex p-1 items-center" @click.stop="remove(t)">

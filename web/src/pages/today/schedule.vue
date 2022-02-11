@@ -13,7 +13,7 @@
               @dragend="dragEnd($event)"
             >
               <div class="flex w-full">
-                <div class="flex-1 no-wrap text-left p-1">
+                <div class="flex-1 no-wrap text-left p-1" :title="item.title">
                   {{ item.title }}
                 </div>
               </div>
