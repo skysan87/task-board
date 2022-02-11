@@ -34,15 +34,15 @@
                   :key="t.id"
                   class="absolute bg-red-300 border border-black left-1 flex"
                   :style="calcDisplayTask(t)"
-                  :class="taskBlockName"
+                  :class="[(dragging && t.id === taskId) ? 'grabbing' : 'grab', taskBlockName]"
                   @mousedown.prevent="mouseDownMove($event, t)"
                 >
                   <div class="flex w-full">
                     <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
                       {{ t.name }}
                     </div>
-                    <div class="flex p-1 items-center" @click.stop="remove(t)">
-                      <fa :icon="['fas', 'trash-alt']" size="xs" />
+                    <div class="flex p-2 items-center cursor-pointer" @click.stop="remove(t)">
+                      <fa :icon="['fas', 'times']" size="xs" />
                     </div>
                   </div>
                   <div
