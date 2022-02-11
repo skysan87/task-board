@@ -153,8 +153,9 @@ export default {
         this.top = e.target.style.top
         this.element = e.target
       } else {
-        this.top = e.target.parentElement.style.top
-        this.element = e.target.parentElement
+        const ancestor = e.target.closest(`.${this.taskBlockName}`)
+        this.top = ancestor.style.top
+        this.element = ancestor
       }
     },
 
