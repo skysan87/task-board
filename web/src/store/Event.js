@@ -8,7 +8,7 @@ export const state = () => ({
 })
 
 export const getters = {
-  getConfig: (state) => {
+  getEvent: (state) => {
     return state.event
   }
 }
@@ -24,16 +24,21 @@ export const mutations = {
 }
 
 export const actions = {
-  async init ({ commit }) {
+  /**
+   * 初期化
+   * @param {context} コンテキスト
+   * @param {String} dateString YYYY-MM-DD
+   */
+  async init ({ commit }, dateString) {
     try {
-      const eventList = await dao.get()
+      const eventList = await dao.getById(dateString)
 
       let event = null
 
       if (eventList.length > 0) {
         event = eventList[0]
       } else {
-        const result = await dao.add()
+        const result = await dao.add(dateString)
         if (result.isSuccess) {
           event = result.value
         }
@@ -47,13 +52,35 @@ export const actions = {
     console.log('event init')
   },
 
-  // TODO:
-  async updateMessage ({ state, commit }, message) {
-    const event = new Event(state.event.id, state.event) // copy
-    event.globalMessage = message
+  async addTask ({ state, commit }, task) {
+    const copyEvent = new Event(state.event.id, state.event)
+    copyEvent.addTask(task)
+    if (await dao.update(copyEvent)) {
+      commit('update', copyEvent)
+    }
+  },
 
-    if (await dao.update(event)) {
-      commit('update', event)
+  async updateTask ({ state, commit }, task) {
+    const copyEvent = new Event(state.event.id, state.event)
+    copyEvent.updateTask(task)
+    if (await dao.update(copyEvent)) {
+      commit('update', copyEvent)
+    }
+  },
+
+  async removeTask ({ state, commit }, taskId) {
+    const copyEvent = new Event(state.event.id, state.event)
+    copyEvent.removeTask(taskId)
+    if (await dao.update(copyEvent)) {
+      commit('update', copyEvent)
+    }
+  },
+
+  async removeAll ({ state, commit }) {
+    const copyEvent = new Event(state.event.id, state.event)
+    copyEvent.removeAll()
+    if (await dao.update(copyEvent)) {
+      commit('update', copyEvent)
     }
   }
 }

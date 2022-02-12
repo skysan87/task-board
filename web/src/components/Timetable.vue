@@ -142,7 +142,7 @@ export default {
       time.isEnter = false
 
       const taskId = e.dataTransfer.getData('text/plain')
-      this.$emit('add', { taskId, startTime: time.start, endTime: time.end })
+      this.$emit('add', { id: taskId, startTime: time.start, endTime: time.end })
     },
 
     mouseDownMove (e, task) {

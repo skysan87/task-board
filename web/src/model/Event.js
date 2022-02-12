@@ -1,7 +1,10 @@
 export class Event {
   constructor (id, params) {
-    this.id = id // YYYYMMDD
-    this.tasks = params.tasks || []
+    this.id = id // YYYYY-MM-DD
+    this.tasks = []
+    if (Array.isArray(params.tasks)) {
+      this.tasks = params.tasks.map((t) => { return this.getTaskProperties(t) })
+    }
     this.createdAt = params.createdAt || null
     this.updatedAt = params.updatedAt || null
   }
@@ -15,26 +18,40 @@ export class Event {
     }
   }
 
-  addTask (id, start, end) {
+  addTask ({ id, startTime, endTime }) {
     this.tasks.push({
       id,
-      startTime: start,
-      endTime: end
+      startTime,
+      endTime
     })
   }
 
-  deleteTask (id) {
+  removeTask (id) {
     const index = this.tasks.findIndex(t => t.id === id)
-    if (index > 0) {
+    if (index >= 0) {
       this.tasks.splice(index, 1)
     }
   }
 
-  updateTask (id, start, end) {
+  removeAll () {
+    this.tasks.length = 0
+  }
+
+  updateTask ({ id, startTime, endTime }) {
     const task = this.tasks.find(t => t.id === id)
     if (task) {
-      task.startTime = start
-      task.endTime = end
+      task.startTime = startTime
+      task.endTime = endTime
+    }
+  }
+
+  /**
+   * @param {{id: String, startTime: Number, endTime: Number}} Object
+   */
+  getTaskProperties ({ id, startTime, endTime }) {
+    // NOTE: vuexのstate変更エラー回避
+    return {
+      id, startTime, endTime
     }
   }
 }

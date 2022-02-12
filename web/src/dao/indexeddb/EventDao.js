@@ -32,4 +32,8 @@ export class EventDao {
     event.updatedAt = new Date()
     return await db.update(STORE_NAME, event.getData())
   }
+
+  async delete (eventId) {
+    return await db.delete(STORE_NAME, eventId)
+  }
 }

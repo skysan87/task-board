@@ -53,7 +53,7 @@ export default {
 
   data () {
     return {
-      // allTasks: this.$store.getters['Todo/getFilteredTodos'],
+      // TODO: Vuex側で処理したい
       scheduledTasks: [],
       dateString: dateFactory(new Date()).format('YYYY-MM-DD'),
       range: { start: '09:00', end: '14:00' },
@@ -76,9 +76,20 @@ export default {
 
   // TODO: リセットボタン
   methods: {
-    initialize () {
-      this.$store.dispatch('Todo/initTodaylist')
-      // TODO: 登録したスケジュールを取得
+    async initialize () {
+      await this.$store.dispatch('Todo/initTodaylist')
+      // 登録したスケジュールを取得
+      await this.$store.dispatch('Event/init', this.dateString)
+
+      const schedule = this.$store.getters['Event/getEvent'].tasks
+      this.$store.getters['Todo/getFilteredTodos'].forEach((todo) => {
+        const sheduleTask = schedule.find(s => s.id === todo.id)
+        if (sheduleTask) {
+          this.scheduledTasks.push({
+            ...sheduleTask, name: todo.title
+          })
+        }
+      })
     },
 
     dragTask (e, task) {
@@ -93,28 +104,42 @@ export default {
     },
 
     add (data) {
-      const task = this.freeTasks.find(t => t.id === data.taskId)
+      // TODO: Vuex側で処理したい
+      const task = this.freeTasks.find(t => t.id === data.id)
       this.scheduledTasks.push({
-        id: data.taskId,
+        id: data.id,
         name: task.title,
         startTime: data.startTime,
         endTime: data.endTime
       })
-      // TODO: 保存
+
+      this.$store.dispatch('Event/addTask', {
+        id: data.id,
+        startTime: data.startTime,
+        endTime: data.endTime
+      })
     },
 
     update (data) {
+      // TODO: Vuex側で処理したい
       const index = this.scheduledTasks.findIndex(t => t.id === data.id)
       this.scheduledTasks[index].startTime = data.startTime
       this.scheduledTasks[index].endTime = data.endTime
-      // TODO: 保存
+
+      this.$store.dispatch('Event/updateTask', {
+        id: data.id,
+        startTime: data.startTime,
+        endTime: data.endTime
+      })
     },
 
     remove (data) {
+      // TODO: Vuex側で処理したい
       const index = this.scheduledTasks.findIndex(t => t.id === data.id)
       if (index >= 0) {
         this.scheduledTasks.splice(index, 1)
       }
+      this.$store.dispatch('Event/removeTask', data.id)
     }
   }
 }
