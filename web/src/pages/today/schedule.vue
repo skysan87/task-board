@@ -1,46 +1,44 @@
 <template>
-  <div class="flex flex-col" style="height: 100vh;">
-    <main class="flex-1 flex flex-row overflow-y-hidden">
-      <div class="flex-0 bg-gray-200 p-2 mx-1 select-none overflow-x-hidden" style="min-width: 220px; max-width: 220px;">
-        <div class="mx-2">
-          <div class="list-group">
-            <div
-              v-for="item in freeTasks"
-              :key="item.id"
-              class="list-group-item list-style"
-              draggable="true"
-              @dragstart="dragTask($event, item)"
-              @dragend="dragEnd($event)"
-            >
-              <div class="flex w-full">
-                <div class="flex-1 no-wrap text-left p-1" :title="item.title">
-                  {{ item.title }}
-                </div>
+  <main class="grid grid-rows-1 grid-cols-2 h-screen">
+    <div class="bg-gray-200 p-2 select-none overflow-x-hidden">
+      <div class="mx-2">
+        <div class="list-group">
+          <div
+            v-for="item in freeTasks"
+            :key="item.id"
+            class="list-group-item list-style"
+            draggable="true"
+            @dragstart="dragTask($event, item)"
+            @dragend="dragEnd($event)"
+          >
+            <div class="flex w-full">
+              <div class="flex-1 no-wrap text-left p-1" :title="item.title">
+                {{ item.title }}
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div style="min-width: 400px;" class="bg-gray-300 p-2 mx-1 flex flex-col">
-        <div class="flex-0 flex justify-end pr-8">
-          <button class="block btn btn-red-outline" @click="reset">
-            RESET
-          </button>
-        </div>
-        <div class="flex-0 overflow-x-hidden">
-          <timetable
-            :range="range"
-            :tasks="scheduledTasks"
-            :is-dropping="dragging"
-            @add="add"
-            @update="update"
-            @remove="remove"
-          />
-        </div>
+    <div class="bg-gray-300 p-2 flex flex-col">
+      <div class="flex-0 flex justify-end pr-8">
+        <button class="block btn btn-red-outline" @click="reset">
+          RESET
+        </button>
       </div>
-    </main>
-  </div>
+      <div class="flex-0 overflow-auto">
+        <timetable
+          :range="range"
+          :tasks="scheduledTasks"
+          :is-dropping="dragging"
+          @add="add"
+          @update="update"
+          @remove="remove"
+        />
+      </div>
+    </div>
+  </main>
 </template>
 
 <script>
@@ -61,7 +59,7 @@ export default {
       // TODO: Vuex側で処理したい
       scheduledTasks: [],
       dateString: dateFactory(new Date()).format('YYYY-MM-DD'),
-      range: { start: '09:00', end: '14:00' },
+      range: { start: '09:00', end: '18:00' },
       dragging: false
     }
   },
