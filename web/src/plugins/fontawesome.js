@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { config, library } from '@fortawesome/fontawesome-svg-core'
 import {
   faEllipsisV, faEdit, faCircleNotch, faCaretDown, faPlus, faCalendarDay, faArrowLeft,
-  faSignOutAlt
+  faSignOutAlt, faTimes
 } from '@fortawesome/free-solid-svg-icons'
 import { faPlusSquare, faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
@@ -14,7 +14,7 @@ config.autoAddCss = true
 // 利用するアイコンを配列に追加
 const solidIcons = [
   faEllipsisV, faEdit, faCircleNotch, faCaretDown, faPlus, faCalendarDay, faArrowLeft,
-  faSignOutAlt
+  faSignOutAlt, faTimes
 ]
 const regularIcons = [faPlusSquare, faCalendar]
 const bransIcons = [faGoogle]
