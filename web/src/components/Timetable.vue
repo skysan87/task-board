@@ -41,8 +41,8 @@
                     <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
                       {{ t.name }}
                     </div>
-                    <div class="flex p-2 items-center cursor-pointer" @click.stop="remove(t)">
-                      <fa :icon="['fas', 'times']" size="xs" />
+                    <div class="flex p-2 items-center">
+                      <fa :icon="['fas', 'times']" size="xs" class="cursor-pointer" @click.stop="remove(t)" />
                     </div>
                   </div>
                   <div
