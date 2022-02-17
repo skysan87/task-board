@@ -161,6 +161,7 @@ export default {
       this.$emit('add', { id: taskId, startTime: time.start, endTime: time.end })
     },
 
+    // FIXME: ドラッグ時にスクロールした場合のドラッグ位置のずれ
     mouseDownMove (e, task) {
       this.dragging = true
       this.pageY = e.pageY
