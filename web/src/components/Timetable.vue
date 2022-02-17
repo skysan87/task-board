@@ -97,8 +97,8 @@ export default {
       dateString: dayjs().format('YYYY-MM-DD'),
       // ドラッグ
       dragging: false,
-      top: '',
-      height: '',
+      top: 0,
+      height: 0,
       element: '',
       taskId: '',
       resizing: false,
@@ -166,11 +166,13 @@ export default {
       this.pageY = e.pageY
       this.taskId = task.id
       if (e.target.classList.contains(this.taskBlockName)) {
-        this.top = e.target.style.top
+        this.top = parseInt(e.target.style.top.replace('px', ''))
+        this.height = parseInt(e.target.style.height.replace('px', ''))
         this.element = e.target
       } else {
         const ancestor = e.target.closest(`.${this.taskBlockName}`)
-        this.top = ancestor.style.top
+        this.top = parseInt(ancestor.style.top.replace('px', ''))
+        this.height = parseInt(ancestor.style.height.replace('px', ''))
         this.element = ancestor
       }
     },
@@ -178,7 +180,7 @@ export default {
     mouseMove (e) {
       if (this.dragging) {
         const diff = e.pageY - this.pageY
-        const actualTop = parseInt(this.top.replace('px', '')) + diff
+        const actualTop = this.top + diff
         if (actualTop >= 0 && actualTop + this.blockSize <= this.timetableHeight) {
           this.element.style.top = `${actualTop}px`
         }
@@ -211,7 +213,7 @@ export default {
           }
           this.$emit('update', task)
         } else {
-          this.element.style.top = this.top
+          this.element.style.top = `${this.top}px`
         }
       }
 
@@ -234,7 +236,7 @@ export default {
           }
           this.$emit('update', task)
         } else {
-          this.element.style.height = this.height
+          this.element.style.height = `${this.height}px`
         }
       }
 
@@ -244,20 +246,20 @@ export default {
 
     mouseDownResize (e, task) {
       this.resizing = true
-      this.height = e.target.parentElement.style.height
       this.pageY = e.pageY
       this.element = e.target.parentElement
       this.taskId = task.id
 
       const ancestor = e.target.closest(`.${this.taskBlockName}`)
-      this.top = ancestor.style.top
+      this.top = parseInt(ancestor.style.top.replace('px', ''))
+      this.height = parseInt(ancestor.style.height.replace('px', ''))
     },
 
     mouseMoveResize (e) {
       if (this.resizing) {
         const diff = e.pageY - this.pageY
-        const actualHight = parseInt(this.height.replace('px', '')) + diff
-        const actualTop = parseInt(this.top.replace('px', ''))
+        const actualHight = this.height + diff
+        const actualTop = this.top
         if (actualHight >= this.blockSize && actualTop + actualHight <= this.timetableHeight) {
           this.element.style.height = `${actualHight}px`
         }
