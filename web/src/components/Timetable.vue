@@ -1,61 +1,60 @@
 <template>
-  <div class="h-screen">
-    <main>
-      <div class="bg-gray-300 p-2 mx-1 flex flex-col">
-        <div class="flex-0 overflow-hidden">
-          <div class="m-2" />
-          <div class="flex">
-            <div id="time-container">
-              <div v-for="(time, index) in timetable" :key="index" class="bg-grey-200 select-none">
-                <div class="timetable-label" :style="`height: ${blockSize}px;`">
-                  <span class="timetable-label__text">{{ time.label }}</span>
+  <div>
+    <div class="bg-gray-300 p-2 mx-1 flex flex-col">
+      <div class="flex-0 overflow-hidden">
+        <div class="m-2" />
+        <div class="flex">
+          <div id="time-container" class="flex-0">
+            <div v-for="(time, index) in timetable" :key="index" class="bg-grey-200 select-none">
+              <div class="timetable-label" :style="`height: ${blockSize}px;`">
+                <span class="timetable-label__text">{{ time.label }}</span>
+              </div>
+            </div>
+          </div>
+          <div id="task-container" class="relative flex-1">
+            <div v-for="(time, index) in timetable" :key="index" class="bg-grey-200 select-none">
+              <div
+                class="timetable-row mx-1"
+                :class="{ 'border-top': index === 0, 'drag-enter': (time.isEnter) }"
+                :style="`height: ${blockSize}px;`"
+                @dragenter="dragEnter(time.id)"
+                @dragleave="dragLeave(time.id)"
+                @drop.prevent="drop($event, time.id)"
+                @dragover.prevent
+              >
+                <div class="select-none no-wrap px-1">
+                  {{ reserved(time) }}
                 </div>
               </div>
             </div>
-            <div id="task-container" class="relative">
-              <div v-for="(time, index) in timetable" :key="index" class="bg-grey-200 select-none">
-                <div
-                  class="timetable-row mx-1 flex-1"
-                  :class="{ 'border-top': index === 0, 'drag-enter': (time.isEnter) }"
-                  :style="`min-width: 400px; max-width: 400px; height: ${blockSize}px;`"
-                  @dragenter="dragEnter(time.id)"
-                  @dragleave="dragLeave(time.id)"
-                  @drop.prevent="drop($event, time.id)"
-                  @dragover.prevent
-                >
-                  <div class="select-none no-wrap px-1">
-                    {{ reserved(time) }}
+            <div v-show="!isDropping" class="inset-0 absolute">
+              <div
+                v-for="t in tasks"
+                :key="t.id"
+                class="absolute bg-red-300 border border-black left-1 flex"
+                style="width: 99%"
+                :style="calcDisplayTask(t)"
+                :class="[(dragging && t.id === taskId) ? 'grabbing' : 'grab', taskBlockName]"
+                @mousedown.prevent="mouseDownMove($event, t)"
+              >
+                <div class="flex w-full">
+                  <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
+                    {{ t.name }}
+                  </div>
+                  <div class="flex p-2 items-center">
+                    <fa :icon="['fas', 'times']" size="xs" class="cursor-pointer" @click.stop="remove(t)" />
                   </div>
                 </div>
-              </div>
-              <div v-show="!isDropping" class="inset-0 absolute">
                 <div
-                  v-for="t in tasks"
-                  :key="t.id"
-                  class="absolute bg-red-300 border border-black left-1 flex"
-                  :style="calcDisplayTask(t)"
-                  :class="[(dragging && t.id === taskId) ? 'grabbing' : 'grab', taskBlockName]"
-                  @mousedown.prevent="mouseDownMove($event, t)"
-                >
-                  <div class="flex w-full">
-                    <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
-                      {{ t.name }}
-                    </div>
-                    <div class="flex p-2 items-center">
-                      <fa :icon="['fas', 'times']" size="xs" class="cursor-pointer" @click.stop="remove(t)" />
-                    </div>
-                  </div>
-                  <div
-                    class="h-2 absolute w-full left-0 bottom-0 cursor-resize"
-                    @mousedown.stop="mouseDownResize($event, t)"
-                  />
-                </div>
+                  class="h-2 absolute w-full left-0 bottom-0 cursor-resize"
+                  @mousedown.stop="mouseDownResize($event, t)"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -308,8 +307,7 @@ export default {
       const start = timeFrom.diff(startTime, 'minute', true) / DURATION
       return {
         top: `${this.blockSize * start}px`,
-        height: `${this.blockSize * between - 1}px`,
-        width: '98%'
+        height: `${this.blockSize * between - 1}px`
       }
     },
 
@@ -347,6 +345,7 @@ export default {
   border-bottom: 1px solid rgb(33, 33, 226);
   border-right: 1px solid rgb(33, 33, 226);
   border-left: 1px solid rgb(33, 33, 226);
+  width: 100%;
 }
 
 .border-top {
