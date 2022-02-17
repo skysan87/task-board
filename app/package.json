@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "src/main/main.js",
   "scripts": {
-    "dev": "MODE=dev electron .",
-    "start": "electron .",
+    "dev": "cross-env NODE_ENV=dev electron .",
+    "start": "cross-env NODE_ENV=prod electron .",
     "build:mac": "electron-builder --mac --x64 --dir"
   },
   "build": {
-    "appId": "com.nuxt-electron-sample.app",
+    "appId": "com.task-board.app",
+    "productName": "task-board",
     "files": [
       "dist",
       "src"
@@ -27,5 +28,8 @@
     "electron": "^13.1.2",
     "electron-builder": "^22.11.7",
     "electron-devtools-installer": "^3.2.0"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
   }
 }

@@ -55,4 +55,8 @@ class Wrapper {
   toDate () {
     return this.instance.toDate()
   }
+
+  format (template) {
+    return this.instance.format(template)
+  }
 }

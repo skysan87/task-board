@@ -10,7 +10,10 @@ const devConfig = {
   target: 'static',
 
   env: {
-    app_version: packageInfo.version
+    app_version: packageInfo.version,
+    MAX_SIZE_TODO: 200,
+    MAX_SIZE_TODOLIST: 20,
+    MAX_SIZE_HABIT: 30
   },
 
   head: {
@@ -41,7 +44,8 @@ const devConfig = {
   components: true,
 
   buildModules: [
-    '@nuxt/typescript-build',
+    // NOTE: tsファイルがないエラー回避
+    // '@nuxt/typescript-build',
     '@nuxtjs/tailwindcss'
   ],
 
