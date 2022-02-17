@@ -89,6 +89,7 @@ export default {
       default: false
     }
   },
+
   data () {
     return {
       blockSize: 48,
@@ -104,6 +105,22 @@ export default {
       pageY: '',
       taskBlockName: BLOCK_CLASS_NAME,
       timetableHeight: 0
+    }
+  },
+
+  computed: {
+    calcDisplayTask () {
+      return (task) => {
+        const startTime = dayjs(`${this.dateString} ${this.range.start}`)
+        const timeFrom = dayjs(task.startTime)
+        const timeTo = dayjs(task.endTime)
+        const between = timeTo.diff(timeFrom, 'minute', true) / DURATION
+        const start = timeFrom.diff(startTime, 'minute', true) / DURATION
+        return {
+          top: `${this.blockSize * start}px`,
+          height: `${this.blockSize * between - 1}px`
+        }
+      }
     }
   },
 
@@ -231,13 +248,18 @@ export default {
       this.pageY = e.pageY
       this.element = e.target.parentElement
       this.taskId = task.id
+
+      const ancestor = e.target.closest(`.${this.taskBlockName}`)
+      this.top = ancestor.style.top
     },
 
     mouseMoveResize (e) {
       if (this.resizing) {
         const diff = e.pageY - this.pageY
-        if (parseInt(this.height.replace('px', '')) + diff > this.blockSize) {
-          this.element.style.height = `${parseInt(this.height.replace('px', '')) + diff}px`
+        const actualHight = parseInt(this.height.replace('px', '')) + diff
+        const actualTop = parseInt(this.top.replace('px', ''))
+        if (actualHight >= this.blockSize && actualTop + actualHight <= this.timetableHeight) {
+          this.element.style.height = `${actualHight}px`
         }
       }
     },
@@ -297,18 +319,6 @@ export default {
 
       date.setHours(hour, minute, 0, 0)
       return date
-    },
-
-    calcDisplayTask (task) {
-      const startTime = dayjs(`${this.dateString} ${this.range.start}`)
-      const timeFrom = dayjs(task.startTime)
-      const timeTo = dayjs(task.endTime)
-      const between = timeTo.diff(timeFrom, 'minute', true) / DURATION
-      const start = timeFrom.diff(startTime, 'minute', true) / DURATION
-      return {
-        top: `${this.blockSize * start}px`,
-        height: `${this.blockSize * between - 1}px`
-      }
     },
 
     reserved (time) {
