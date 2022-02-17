@@ -181,7 +181,7 @@ export default {
       if (this.dragging) {
         const diff = e.pageY - this.pageY
         const actualTop = this.top + diff
-        if (actualTop >= 0 && actualTop + this.blockSize <= this.timetableHeight) {
+        if (actualTop >= 0 && actualTop + this.height <= this.timetableHeight) {
           this.element.style.top = `${actualTop}px`
         }
       }
@@ -259,8 +259,7 @@ export default {
       if (this.resizing) {
         const diff = e.pageY - this.pageY
         const actualHight = this.height + diff
-        const actualTop = this.top
-        if (actualHight >= this.blockSize && actualTop + actualHight <= this.timetableHeight) {
+        if (actualHight >= this.blockSize && this.top + actualHight <= this.timetableHeight) {
           this.element.style.height = `${actualHight}px`
         }
       }
