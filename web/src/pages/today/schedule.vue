@@ -23,6 +23,11 @@
       </div>
 
       <div style="min-width: 400px;" class="bg-gray-300 p-2 mx-1 flex flex-col">
+        <div class="flex-0 flex justify-end pr-8">
+          <button class="block btn btn-red-outline" @click="reset">
+            RESET
+          </button>
+        </div>
         <div class="flex-0 overflow-x-hidden">
           <timetable
             :range="range"
@@ -74,7 +79,6 @@ export default {
     this.initialize()
   },
 
-  // TODO: リセットボタン
   methods: {
     async initialize () {
       await this.$store.dispatch('Todo/initTodaylist')
@@ -140,6 +144,14 @@ export default {
         this.scheduledTasks.splice(index, 1)
       }
       this.$store.dispatch('Event/removeTask', data.id)
+    },
+
+    reset () {
+      if (confirm('リセットしますか？')) {
+        // TODO: Vuex側で処理したい
+        this.scheduledTasks = []
+        this.$store.dispatch('Event/removeAll')
+      }
     }
   }
 }
