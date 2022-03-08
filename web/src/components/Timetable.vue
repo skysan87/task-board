@@ -41,7 +41,10 @@
                   <div class="select-none flex-1 no-wrap text-left px-1" :title="t.name">
                     {{ t.name }}
                   </div>
-                  <div class="flex p-2 items-center">
+                  <div class="flex pr-2 items-center">
+                    <fa :icon="['fas', 'edit']" size="xs" class="cursor-pointer" @click.stop="show(t)" />
+                  </div>
+                  <div class="flex pr-2 items-center">
                     <fa :icon="['fas', 'times']" size="xs" class="cursor-pointer" @click.stop="remove(t)" />
                   </div>
                 </div>
@@ -333,6 +336,10 @@ export default {
 
     remove (task) {
       this.$emit('remove', task)
+    },
+
+    show (task) {
+      this.$emit('show', task.id)
     }
   }
 }
