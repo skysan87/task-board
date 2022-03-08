@@ -15,6 +15,9 @@
               <div class="flex-1 no-wrap text-left p-1" :title="item.title">
                 {{ item.title }}
               </div>
+              <div class="pr-2">
+                <fa :icon="['fas', 'edit']" size="xs" class="cursor-pointer" @click.stop="showDialog(item.id)" />
+              </div>
             </div>
           </div>
         </div>
@@ -35,6 +38,7 @@
           @add="add"
           @update="update"
           @remove="remove"
+          @show="showDialog"
         />
       </div>
     </div>
@@ -42,8 +46,12 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { dateFactory } from '@/util/DateFactory'
 import Timetable from '@/components/Timetable.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
+
+const DialogController = Vue.extend(ModalDialog)
 
 export default {
   name: 'Schedule',
@@ -60,7 +68,8 @@ export default {
       scheduledTasks: [],
       dateString: dateFactory(new Date()).format('YYYY-MM-DD'),
       range: { start: '09:00', end: '18:00' },
-      dragging: false
+      dragging: false,
+      dialog: null
     }
   },
 
@@ -150,6 +159,32 @@ export default {
         this.scheduledTasks = []
         this.$store.dispatch('Event/removeAll')
       }
+    },
+
+    showDialog (taskId) {
+      const task = this.$store.getters['Todo/getTodoById'](taskId)
+      const list = this.$store.getters['Todolist/getLists']
+
+      delete this.dialog
+      this.dialog = new DialogController({
+        propsData: {
+          parent: this.$root.$el,
+          target: task,
+          isCreateMode: false,
+          projectList: list
+        }
+      })
+      this.dialog.$on('update', (todo) => {
+        this.$store.dispatch('Todo/update', todo)
+        const index = this.scheduledTasks.findIndex(t => t.id === todo.id)
+        if (index >= 0) {
+          this.scheduledTasks[index].name = todo.title
+        }
+      })
+      this.dialog.$on('delete', () => {
+        this.$toast.error('ここでは削除できません')
+      })
+      this.dialog.$mount()
     }
   }
 }
