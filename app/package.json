@@ -25,8 +25,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^13.1.2",
-    "electron-builder": "^22.11.7",
+    "electron": "^17.1.2",
+    "electron-builder": "^22.14.13",
     "electron-devtools-installer": "^3.2.0"
   },
   "dependencies": {
