@@ -93,7 +93,8 @@ export default {
       await this.$store.dispatch('Event/init', this.dateString)
 
       const schedule = this.$store.getters['Event/getEvent'].tasks
-      this.$store.getters['Todo/getFilteredTodos'].forEach((todo) => {
+      // 終了したタスクも表示する
+      this.$store.getters['Todo/getOrderdTodos'].forEach((todo) => {
         const sheduleTask = schedule.find(s => s.id === todo.id)
         if (sheduleTask) {
           this.scheduledTasks.push({
