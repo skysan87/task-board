@@ -107,6 +107,34 @@
           </div>
         </div>
 
+        <div class="modal-body">
+          <label class="input-label">チェックリスト ({{ subtaskDoneCount }}/{{ todo.subTasks.length }})</label>
+          <sub-task-input
+            v-for="subtask in todo.subTasks"
+            :key="subtask.id"
+            :inputdata="subtask"
+            @update="updateSubtask"
+            @delete="deleteSubtask"
+          />
+          <!-- アイテム追加ボタン -->
+          <button
+            v-if="!isNewSubtask"
+            ref="addButton"
+            :disabled="forbid.addButton"
+            class="btn btn-regular"
+            :class="{'btn-disabled': forbid.addButton}"
+            @click.stop="isNewSubtask = true"
+          >
+            追加
+          </button>
+          <sub-task-input
+            v-if="isNewSubtask"
+            :is-create-mode="true"
+            @cancel="isNewSubtask = false"
+            @add="addSubTask"
+          />
+        </div>
+
         <div class="flex flex-row-reverse">
           <button class="btn btn-regular ml-2" @click="update">
             OK
@@ -138,17 +166,25 @@ import isEmpty from 'lodash/isEmpty'
 import { TaskState } from '@/util/TaskState'
 import { Todo } from '@/model/Todo'
 import { dateFactory } from '@/util/DateFactory'
+import SubTaskInput from '@/components/SubTaskInput.vue'
 
 export default {
   name: 'ModalDialog',
+  components: {
+    SubTaskInput
+  },
   props: {
     parent: {
       type: Element,
-      require: true
+      require: true,
+      default: null
     },
     target: {
-      type: Todo,
-      require: true
+      type: Object,
+      require: true,
+      default () {
+        return new Todo('', {})
+      }
     },
     isCreateMode: {
       type: Boolean,
@@ -156,20 +192,23 @@ export default {
     },
     projectList: {
       type: Array,
-      require: false
+      require: false,
+      default: () => []
     }
   },
   data () {
     return {
-      todo: new Todo('', {}),
+      todo: Todo.valueOf(this.target),
       range: { start: null, end: null },
       options: Object.values(TaskState),
       errorMsg: '',
+      isNewSubtask: false,
       forbid: {
         title: false,
         detail: false,
         range: false,
-        delete: false
+        delete: false,
+        addButton: false
       },
       footerMsg: '',
       calenderAttributes: [{ // 今日に目印
@@ -182,6 +221,9 @@ export default {
   computed: {
     isTypeTodo () {
       return this.todo.type === Todo.TYPE_TODO
+    },
+    subtaskDoneCount () {
+      return this.todo.subTasks.filter(t => t.isDone).length
     }
   },
   mounted () {
@@ -198,9 +240,6 @@ export default {
   },
   methods: {
     init () {
-      if (this.target !== null) {
-        Object.assign(this.todo, this.target)
-      }
       this.range = {
         start: this.todo.startdate !== null ? dateFactory(this.todo.startdate.toString()).toDate() : null,
         end: this.todo.enddate !== null ? dateFactory(this.todo.enddate.toString()).toDate() : null
@@ -212,6 +251,7 @@ export default {
         this.forbid.detail = true
         this.forbid.range = true
         this.forbid.delete = true
+        this.forbid.addButton = true
         this.footerMsg = '習慣から生成されたタスクはステータスの変更のみ可能です。'
       }
 
@@ -251,6 +291,22 @@ export default {
     },
     initRange () {
       this.range = { start: null, end: null }
+    },
+    addSubTask (data) {
+      this.todo.subTasks.push(data)
+      this.isNewSubtask = false
+
+      this.$nextTick(() => {
+        this.$refs.addButton.focus()
+      })
+    },
+    deleteSubtask (data) {
+      const index = this.todo.subTasks.findIndex(v => v.id === data.id)
+      this.todo.subTasks.splice(index, 1)
+    },
+    updateSubtask (data) {
+      const index = this.todo.subTasks.findIndex(v => v.id === data.id)
+      Object.assign(this.todo.subTasks[index], data)
     }
   }
 }
