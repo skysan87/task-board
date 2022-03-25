@@ -26,6 +26,9 @@
 
     <div class="bg-gray-300 p-2 flex flex-col">
       <div class="flex-0 flex justify-end pr-8">
+        <button class="block btn btn-outline mr-2" @click="focusMode">
+          FOCUS
+        </button>
         <button class="block btn btn-red-outline" @click="reset">
           RESET
         </button>
@@ -160,6 +163,10 @@ export default {
         this.scheduledTasks = []
         this.$store.dispatch('Event/removeAll')
       }
+    },
+
+    focusMode () {
+      this.$router.push('/focus')
     },
 
     showDialog (taskId) {

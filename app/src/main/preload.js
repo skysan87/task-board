@@ -4,5 +4,6 @@ const { contextBridge, ipcRenderer } = require('electron')
 // ex) window.electron.メソッド名(引数)
 contextBridge.exposeInMainWorld(
   'electron', {
+    resizeWindow: (args) => ipcRenderer.send('ipc-resize-window', args)
   }
 )
