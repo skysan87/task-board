@@ -14,7 +14,7 @@
             完了
           </button>
         </div>
-        <div class="flex-1 overflow-y-scroll">
+        <div class="flex-1 overflow-y-auto">
           <!-- 詳細モード -->
           <div class="mx-2">
             <div v-if="projectTitle !== ''" class="my-4">
@@ -27,7 +27,7 @@
             <div class="my-4">
               <label class="input-label">タイトル</label>
               <div>
-                <span class="input-text">{{ todo.title }}</span>
+                <span class="input-text break-all">{{ todo.title }}</span>
               </div>
             </div>
 
@@ -64,21 +64,21 @@
       </div>
 
       <!-- コンパクトモード -->
-      <div v-else class="bg-red-100 flex items-center px-2 w-full h-screen overflow-hidden">
+      <div v-else class="bg-red-100 flex items-center p-2 w-full h-screen overflow-hidden">
         <div class="flex-none">
           <span title="通常モード" class="p-1" @click="showNormalView">
             <fa :icon="['fas', 'up-right-and-down-left-from-center']" />
           </span>
         </div>
-        <div class="flex-1 pl-2">
-          <div class="break-all text-2xl" :title="todo.title">
+        <div class="flex-1 mx-2 h-full flex flex-col overflow-y-auto">
+          <div class="flex-1 break-all text-2xl flex items-center" :title="todo.title">
             {{ todo.title }}
           </div>
           <div v-if="currentSubTask !== null">
-            <button class="btn btn-outline break-all ml-1" @click="finishSubtask(currentSubTask.id)">
+            <button class="flex-1 btn btn-outline break-all ml-1" @click="finishSubtask(currentSubTask.id)">
               {{ currentSubTask.title }}
             </button>
-            <div>({{ subtaskDoneCount }}/{{ todo.subTasks.length }})</div>
+            <div class="flex-none">({{ subtaskDoneCount }}/{{ todo.subTasks.length }})</div>
           </div>
         </div>
         <div class="flex-none">
