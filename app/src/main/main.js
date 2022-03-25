@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Tray, Menu } = require('electron')
 const path = require('path')
+const { registerIpcListener } = require('./ipcListener.js')
 
 const ICON = path.resolve(__dirname, '../img/icon_16px.png') //16px
 
@@ -11,6 +12,7 @@ async function createWindow () {
     width: 800,
     height: 600,
     autoHideMenuBar: true,
+    useContentSize: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -28,6 +30,8 @@ async function createWindow () {
     // production構成時
     await win.loadFile(path.resolve(__dirname, '../../dist/index.html'))
   }
+
+  registerIpcListener(win)
 
   win.on('close', e => {
     e.preventDefault()

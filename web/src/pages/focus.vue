@@ -4,7 +4,7 @@
       <div v-if="!miniMode" class="flex flex-col p-2 bg-green-100 h-screen overflow-hidden">
         <!-- コントロールボタン -->
         <div class="flex-none">
-          <button class="btn btn-regular ml-2" @click="$router.push('/today/schedule')">
+          <button class="btn btn-regular ml-2" @click="boBack">
             戻る
           </button>
           <button class="btn btn-regular ml-2" @click="showMiniView">
@@ -89,7 +89,7 @@
 
     <div v-else class="p-2 h-screen overflow-hidden flex justify-center items-center">
       <div class="flex items-center">
-        <button class="btn btn-red-outline" @click="$router.push('/today/schedule')">戻る</button>
+        <button class="btn btn-red-outline" @click="boBack">戻る</button>
         <span class="text-2xl pl-2">登録されたタスクがありません。</span>
       </div>
     </div>
@@ -129,6 +129,7 @@ export default {
 
   mounted () {
     this.initialize()
+    this.showNormalView()
   },
 
   methods: {
@@ -211,12 +212,29 @@ export default {
 
     showNormalView () {
       this.miniMode = false
-      // TODO: メインメソッドに切り替え通知
+      electron.resizeWindow({
+        width: 800,
+        height: 600,
+        alwaysOnTop: false
+      })
     },
 
     showMiniView () {
       this.miniMode = true
-      // TODO: メインメソッドに切り替え通知
+      electron.resizeWindow({
+        width: 300,
+        height: 240,
+        alwaysOnTop: true
+      })
+    },
+
+    boBack () {
+      electron.resizeWindow({
+        width: 800,
+        height: 600,
+        alwaysOnTop: false
+      })
+      this.$router.push('/today/schedule')
     }
   }
 }
