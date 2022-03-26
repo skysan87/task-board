@@ -26,6 +26,14 @@
 
     <div class="bg-gray-300 p-2 flex flex-col">
       <div class="flex-0 flex justify-end pr-8">
+        <div class="flex relative items-center">
+          <button class="block btn btn-outline mr-2" @click="togglePopup">
+            時間変更
+          </button>
+          <div v-show="popup" class="popup">
+            <time-range ref="range" :start="range.start" :end="range.end" @update="updateTimetable" />
+          </div>
+        </div>
         <button class="block btn btn-outline mr-2" @click="focusMode">
           FOCUS
         </button>
@@ -53,6 +61,7 @@ import Vue from 'vue'
 import { dateFactory } from '@/util/DateFactory'
 import Timetable from '@/components/Timetable.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
+import TimeRange from '@/components/parts/TimeRange.vue'
 
 const DialogController = Vue.extend(ModalDialog)
 
@@ -60,7 +69,8 @@ export default {
   name: 'Schedule',
 
   components: {
-    Timetable
+    Timetable,
+    TimeRange
   },
 
   layout: 'board',
@@ -72,7 +82,8 @@ export default {
       dateString: dateFactory(new Date()).format('YYYY-MM-DD'),
       range: { start: '09:00', end: '18:00' },
       dragging: false,
-      dialog: null
+      dialog: null,
+      popup: false
     }
   },
 
@@ -193,6 +204,19 @@ export default {
         this.$toast.error('ここでは削除できません')
       })
       this.dialog.$mount()
+    },
+
+    togglePopup () {
+      if (this.popup) {
+        this.$refs.range.reset()
+      }
+      this.popup = !this.popup
+    },
+
+    updateTimetable (_range) {
+      this.popup = false
+      this.range = { ..._range }
+      // TODO: update
     }
   }
 }
@@ -222,5 +246,23 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.popup {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 80%;
+  left: -70%;
+  padding: 0.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.5rem;
+  z-index: 10;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  border: 1px solid #979797;
+  background-color: white;
 }
 </style>
