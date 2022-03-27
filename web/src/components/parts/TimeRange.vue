@@ -37,7 +37,7 @@ export default {
     end: {
       type: String,
       require: true,
-      default: '23:30'
+      default: '24:00'
     },
     blockMinutes: {
       type: Number,
@@ -56,7 +56,8 @@ export default {
   computed: {
     timeRange () {
       const blockCount = 24 * 60 / this.blockMinutes // min
-      return Array.from({ length: blockCount }, (_, i) => {
+      // 00:00 - 24:00
+      return Array.from({ length: blockCount + 1 }, (_, i) => {
         const h = Math.floor(i * this.blockMinutes / 60)
         const m = i * this.blockMinutes % 60
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
@@ -66,7 +67,12 @@ export default {
 
   methods: {
     update () {
-      if (convertToInt(this.rangeStart) < MIN_RANGE || MAX_RANGE < convertToInt(this.rangeEnd)) {
+      const start = convertToInt(this.rangeStart)
+      const end = convertToInt(this.rangeEnd)
+      if (start < MIN_RANGE || MAX_RANGE < end) {
+        return
+      }
+      if (end <= start) {
         return
       }
       this.$emit('update', { start: this.rangeStart, end: this.rangeEnd })
