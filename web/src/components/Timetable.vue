@@ -143,7 +143,7 @@ export default {
   methods: {
 
     initialize () {
-      this.createTimetable()
+      this.createTimetable(this.range)
     },
 
     dragEnter (timeId) {
@@ -272,10 +272,10 @@ export default {
     /**
      * タイムテーブルデータの作成
      */
-    createTimetable () {
+    createTimetable (_range) {
       const now = Date.parse(this.dateString)
-      const startTime = this.convertToDate(now, this.range.start)
-      const endTime = this.convertToDate(now, this.range.end)
+      const startTime = this.convertToDate(now, _range.start)
+      const endTime = this.convertToDate(now, _range.end)
 
       const blockMinutes = DURATION
       const blockCount = (endTime - startTime) / (60 * 1000 * blockMinutes)

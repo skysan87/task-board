@@ -43,6 +43,7 @@
       </div>
       <div class="flex-0 overflow-auto">
         <timetable
+          ref="timetable"
           :range="range"
           :tasks="scheduledTasks"
           :is-dropping="dragging"
@@ -223,6 +224,19 @@ export default {
       this.$store.dispatch('Config/updateByKey', {
         key: configKey,
         value: _range
+      })
+      this.$refs.timetable.createTimetable(this.range)
+
+      // 表示範囲外のタスクは除外
+      const startTime = dateFactory(`${this.dateString} ${_range.start}`
+        , 'YYYY-MM-DD HH:mm').toDate().getTime()
+      const endTime = dateFactory(`${this.dateString} ${_range.end}`
+        , 'YYYY-MM-DD HH:mm').toDate().getTime()
+
+      Array.from(this.scheduledTasks).forEach((t) => {
+        if (t.startTime < startTime || endTime < t.endTime) {
+          this.remove(t)
+        }
       })
     }
   }
