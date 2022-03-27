@@ -65,6 +65,8 @@ import TimeRange from '@/components/parts/TimeRange.vue'
 
 const DialogController = Vue.extend(ModalDialog)
 
+const configKey = 'timeRange'
+
 export default {
   name: 'Schedule',
 
@@ -76,11 +78,13 @@ export default {
   layout: 'board',
 
   data () {
+    const range = this.$store.getters['Config/getConfigByKey'](configKey)
+
     return {
       // TODO: Vuex側で処理したい
       scheduledTasks: [],
       dateString: dateFactory(new Date()).format('YYYY-MM-DD'),
-      range: { start: '09:00', end: '18:00' },
+      range: range || { start: '09:00', end: '18:00' },
       dragging: false,
       dialog: null,
       popup: false
@@ -216,7 +220,10 @@ export default {
     updateTimetable (_range) {
       this.popup = false
       this.range = { ..._range }
-      // TODO: update
+      this.$store.dispatch('Config/updateByKey', {
+        key: configKey,
+        value: _range
+      })
     }
   }
 }
