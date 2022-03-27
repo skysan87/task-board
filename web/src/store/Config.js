@@ -10,6 +10,10 @@ export const state = () => ({
 export const getters = {
   getConfig: (state) => {
     return state.config
+  },
+
+  getConfigByKey: state => (key) => {
+    return state.config[key]
   }
 }
 
@@ -50,6 +54,15 @@ export const actions = {
   async updateMessage ({ state, commit }, message) {
     const config = new Config(state.config.id, state.config) // copy
     config.globalMessage = message
+
+    if (await dao.update(config)) {
+      commit('update', config)
+    }
+  },
+
+  async updateByKey ({ state, commit }, { key, value }) {
+    const config = new Config(state.config.id, state.config) // copy
+    config[key] = value
 
     if (await dao.update(config)) {
       commit('update', config)
