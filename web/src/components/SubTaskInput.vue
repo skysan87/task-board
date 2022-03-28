@@ -3,7 +3,7 @@
     <div v-if="!editMode" class="flex items-center">
       <div class="flex-1">
         <label class="flex items-center">
-          <input type="checkbox" class="pl-1 felx-none" :checked="subTask.isDone" @change="updateState">
+          <input type="checkbox" class="pl-1 flex-none" :checked="subTask.isDone" @change="updateState">
           <span class="break-all flex-1 text-left px-1">{{ subTask.title }}</span>
         </label>
       </div>
