@@ -62,14 +62,22 @@
               :attributes="calenderAttributes"
               :disabled="forbid.range"
             >
-              <template #default="{ inputValue, inputEvents }">
+              <template #default="{ inputValue, togglePopover }">
                 <div class="flex justify-center items-center">
+                  <div class="flex items-center">
+                    <button
+                      class="py-1 px-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                      :disabled="forbid.range"
+                      :class="{'btn-disabled': forbid.range}"
+                      @click="togglePopover()"
+                    >
+                      <fa :icon="['fas', 'calendar-day']" ontouchend="" />
+                    </button>
+                  </div>
                   <input
                     :value="inputValue.start"
-                    :disabled="forbid.range"
-                    :class="{'btn-disabled': forbid.range}"
                     class="input-text"
-                    v-on="inputEvents.start"
+                    readonly
                   >
                   <svg
                     class="w-10 h-8 mx-2"
@@ -86,10 +94,8 @@
                   </svg>
                   <input
                     :value="inputValue.end"
-                    :disabled="forbid.range"
-                    :class="{'btn-disabled': forbid.range}"
                     class="input-text"
-                    v-on="inputEvents.end"
+                    readonly
                   >
                 </div>
               </template>
@@ -136,11 +142,14 @@
         </div>
 
         <div class="flex flex-row-reverse">
-          <button class="btn btn-regular ml-2" @click="update">
-            OK
+          <button v-if="isCreateMode" class="btn btn-regular ml-2" @click="add">
+            Add
+          </button>
+          <button v-if="!isCreateMode" class="btn btn-regular ml-2" @click="update">
+            Save
           </button>
           <button class="btn btn-outline ml-2" @click="cancel">
-            Cancel
+            Close
           </button>
           <button
             v-if="!isCreateMode"
@@ -257,26 +266,42 @@ export default {
 
       this.$refs.title.focus()
     },
+
+    add () {
+      if (!this.validate()) {
+        return
+      }
+      this.$emit('add', this.todo)
+      this.$destroy()
+    },
+
     update () {
+      if (!this.validate()) {
+        return
+      }
+      this.$emit('update', this.todo)
+    },
+
+    validate () {
       this.errorMsg = ''
+
       if (isEmpty(this.todo.title)) {
         this.errorMsg = '必須項目です'
-      } else {
-        if (this.range === null || this.range.start === null || this.range.end === null) {
-          this.todo.startdate = null
-          this.todo.enddate = null
-        } else {
-          this.todo.startdate = dateFactory(this.range.start).getDateNumber()
-          this.todo.enddate = dateFactory(this.range.end).getDateNumber()
-        }
-        if (this.isCreateMode) {
-          this.$emit('add', this.todo)
-        } else {
-          this.$emit('update', this.todo)
-        }
-        this.$destroy()
+        return false
       }
+
+      // データ変換
+      if (this.range === null || this.range.start === null || this.range.end === null) {
+        this.todo.startdate = null
+        this.todo.enddate = null
+      } else {
+        this.todo.startdate = dateFactory(this.range.start).getDateNumber()
+        this.todo.enddate = dateFactory(this.range.end).getDateNumber()
+      }
+
+      return true
     },
+
     cancel () {
       this.$destroy()
     },
