@@ -62,14 +62,22 @@
               :attributes="calenderAttributes"
               :disabled="forbid.range"
             >
-              <template #default="{ inputValue, inputEvents }">
+              <template #default="{ inputValue, togglePopover }">
                 <div class="flex justify-center items-center">
+                  <div class="flex items-center">
+                    <button
+                      class="py-1 px-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                      :disabled="forbid.range"
+                      :class="{'btn-disabled': forbid.range}"
+                      @click="togglePopover()"
+                    >
+                      <fa :icon="['fas', 'calendar-day']" ontouchend="" />
+                    </button>
+                  </div>
                   <input
                     :value="inputValue.start"
-                    :disabled="forbid.range"
-                    :class="{'btn-disabled': forbid.range}"
                     class="input-text"
-                    v-on="inputEvents.start"
+                    readonly
                   >
                   <svg
                     class="w-10 h-8 mx-2"
@@ -86,10 +94,8 @@
                   </svg>
                   <input
                     :value="inputValue.end"
-                    :disabled="forbid.range"
-                    :class="{'btn-disabled': forbid.range}"
                     class="input-text"
-                    v-on="inputEvents.end"
+                    readonly
                   >
                 </div>
               </template>
