@@ -24,6 +24,10 @@
   @apply py-1 px-2 text-sm;
 }
 
+.btn-sm {
+  @apply py-0.5 px-1 text-xs;
+}
+
 .btn-disabled {
   @apply opacity-50 cursor-not-allowed;
 }

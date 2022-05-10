@@ -20,24 +20,24 @@ function getFilteredArray (array, option, isAllSelected) {
   }
 }
 
+const DEFAULT_STATE = [TaskState.Todo.value, TaskState.InProgress.value]
+
 /**
  * 習慣タスクの実績計算
  * @description 完了した場合は実績を更新、完了でなくなった場合は実績を戻す
- * @param {Habit} habit_
+ * @param {Habit} habit
  * @param {Todo} oldTodo
  * @param {Todo} newTodo
- * @return {Habit} habit
+ * @return {{Habit, Number}} {habit, habitCounter}
  */
-function calcHabitSummary (habit_, oldTodo, newTodo) {
-  // NOTE: vuex-store-stateは直接操作禁止のためコピー
-  const habit = new Habit('', {})
-  Object.assign(habit, habit_)
+function calcHabitSummary (habit, oldTodo, newTodo) {
+  const cloneHabit = Habit.valueOf(habit)
 
   let habitCounter = 0
   let lastActivityDate = oldTodo.lastActivityDate
 
   if (oldTodo.state === newTodo.state) {
-    return habit
+    return { habit: cloneHabit, habitCounter }
   }
 
   if (newTodo.state === TaskState.Done.value) {
@@ -49,21 +49,31 @@ function calcHabitSummary (habit_, oldTodo, newTodo) {
     lastActivityDate = oldTodo.lastActivityDate
   }
 
-  habit.updateResult(newTodo.state === TaskState.Done.value)
+  cloneHabit.updateResult(newTodo.state === TaskState.Done.value)
 
-  habit.totalActivityCount += habitCounter
-  habit.duration += habitCounter
-  habit.lastActivityDate = lastActivityDate
+  cloneHabit.totalActivityCount += habitCounter
+  cloneHabit.duration += habitCounter
+  cloneHabit.lastActivityDate = lastActivityDate
 
-  return habit
+  return { habit: cloneHabit, habitCounter }
+}
+
+function checkSelected (state) {
+  if (!state.selectedItem) {
+    return
+  }
+  if (!state.todos.includes(v => v.id === state.selectedItem.id)) {
+    state.selectedItem = null
+  }
 }
 
 export const state = () => ({
   todos: [],
-  selectedState: [TaskState.Todo.value, TaskState.InProgress.value],
-  canRemove: false,
+  selectedState: DEFAULT_STATE,
+  editMode: false,
   listId: '',
-  maxIndex: 0
+  maxIndex: 0,
+  selectedItem: null
 })
 
 export const getters = {
@@ -94,8 +104,8 @@ export const getters = {
     }).length
   },
 
-  canRemove: (state) => {
-    return state.canRemove
+  editMode: (state) => {
+    return state.editMode
   },
 
   getSelectedState: (state) => {
@@ -110,6 +120,10 @@ export const getters = {
     return state.todos.length
   },
 
+  selectedItem: (state) => {
+    return state.selectedItem
+  },
+
   maxIndex: (state) => {
     return Math.max.apply(
       null,
@@ -118,17 +132,16 @@ export const getters = {
   }
 }
 
-// 状態の更新
 export const mutations = {
   init (state, payload) {
-    state.selectedState = [TaskState.Todo.value, TaskState.InProgress.value]
-    state.listId = payload.listId
+    state.selectedState = DEFAULT_STATE
+    state.listId = payload.listId || ''
     state.todos = payload.data
+    checkSelected(state)
   },
 
-  initToday (state, payload) {
-    state.listId = ''
-    state.todos = payload.data
+  select (state, target) {
+    state.selectedItem = target
   },
 
   add (state, payload) {
@@ -139,6 +152,7 @@ export const mutations = {
   delete (state, id) {
     const index = state.todos.findIndex(v => v.id === id)
     state.todos.splice(index, 1)
+    checkSelected(state)
   },
 
   update (state, payload) {
@@ -153,9 +167,9 @@ export const mutations = {
     Object.assign(state.todos[index], payload)
   },
 
-  deleteDone (state) {
-    const options = [TaskState.Todo.value, TaskState.InProgress.value]
-    state.todos = getFilteredArray(state.todos, options, false)
+  deleteTodos (state, targetIds) {
+    state.todos = state.todos.filter(t => targetIds.includes(t.id) === false)
+    checkSelected(state)
   },
 
   changeFilter (state, payload) {
@@ -163,11 +177,10 @@ export const mutations = {
   },
 
   switchEdit (state) {
-    state.canRemove = !state.canRemove
+    state.editMode = !state.editMode
   }
 }
 
-// データの加工、非同期処理
 export const actions = {
   async init ({ commit }, listId) {
     // 描画初期化
@@ -179,9 +192,16 @@ export const actions = {
     commit('init', { data: [], listId })
   },
 
+  select ({ commit, dispatch, state }, id) {
+    const target = state.todos.find(v => v.id === id) || null
+
+    commit('select', target)
+    dispatch('View/subPanelName', target ? 'todo-detail' : '', { root: true })
+  },
+
   async initTodaylist ({ commit, rootGetters }) {
     // 描画初期化
-    commit('initToday', { data: [] })
+    commit('init', { data: [], listId: '' })
 
     const today = dateFactory().getDateNumber() // YYYYMMDD
     // 1. 今日の習慣を取得
@@ -193,7 +213,7 @@ export const actions = {
       // Habit.id === Todo.listId
       if (habitTodos.findIndex(v => v.listId === _habit.id) < 0) {
         const todo = new Todo('', {})
-        todo.type = Todo.TYPE_HABIT
+        todo.type = Todo.TYPE.HABIT
         todo.listId = _habit.id // habitのId
         todo.title = _habit.title
         todo.detail = _habit.detail
@@ -217,16 +237,28 @@ export const actions = {
     todos.push(...await dao.getTodaysTask(today))
     // 今日完了したタスク
     todos.push(...await dao.getTodaysDone(today))
-    commit('initToday', { data: todos })
+
+    commit('init', { data: todos, listId: '' })
 
     console.log('todaylist init')
   },
 
+  async initInProgressList ({ commit, rootGetters }) {
+    // 描画初期化
+    commit('init', { data: [], listId: '' })
+
+    const userId = rootGetters['User/userId']
+    const today = dateFactory().getDateNumber() // YYYYMMDD
+
+    commit('init', { data: await dao.getTaskInProgress(userId, today), listId: '' })
+
+    console.log('wip init')
+  },
+
   async changeOrder ({ commit, getters }, params) {
     const filtered = getters.getFilteredTodos
-
-    const srcTodo = filtered[params.oldIndex]
-    const destTodo = filtered[params.newIndex]
+    const srcTodo = { ...filtered[params.oldIndex] }
+    const destTodo = { ...filtered[params.newIndex] }
 
     const sorted = getters.getOrderdTodos
     const actualNewIndex = sorted.findIndex(v => v.id === destTodo.id)
@@ -256,19 +288,26 @@ export const actions = {
     const newOrderIndex = (prevOrderIndex + nextOrderIndex) / 2
 
     if (newOrderIndex !== destTodo.orderIndex) {
-      const item = new Todo('', {})
-      Object.assign(item, srcTodo)
-      item.orderIndex = newOrderIndex
-      if (await dao.update(item)) {
-        commit('update', item)
+      srcTodo.orderIndex = newOrderIndex
+      if (await dao.update(srcTodo)) {
+        commit('update', srcTodo)
       }
     }
   },
 
   async deleteDone ({ commit, state }) {
-    const doneTodo = getFilteredArray(state.todos, [TaskState.Done.value], false)
-    if (await dao.deleteTodos(doneTodo)) {
-      commit('deleteDone')
+    const doneTodoIds = state.todos
+      .filter(t => t.state === TaskState.Done.value)
+      .map(t => t.id)
+
+    if (await dao.deleteTodos(doneTodoIds)) {
+      commit('deleteTodos', doneTodoIds)
+    }
+  },
+
+  async deleteTodos ({ commit }, targetIds) {
+    if (await dao.deleteTodos(targetIds)) {
+      commit('deleteTodos', targetIds)
     }
   },
 
@@ -288,18 +327,28 @@ export const actions = {
     params.listId = state.listId
     params.stateChangeDate = dateFactory().getDateNumber()
     params.orderIndex = getters.size > 0 ? getters.maxIndex + 1 : 1
-    const result = await dao.add(params)
-
-    if (result.isSuccess) {
-      commit('add', result.value)
-    } else {
-      throw new Error('登録に失敗しました')
-    }
+    const todo = await dao.add(params)
+    commit('add', todo)
   },
 
   async delete ({ commit }, id) {
     if (await dao.delete(id)) {
       commit('delete', id)
+    }
+  },
+
+  async setDeadline ({ commit, state }, { ids, startDate, endDate }) {
+    const targets = state.todos.filter(t => ids.includes(t.id))
+      .map((t) => {
+        return {
+          ...t,
+          startdate: startDate,
+          enddate: endDate
+        }
+      })
+
+    if (await dao.updateList(targets)) {
+      targets.forEach(t => commit('update', t))
     }
   },
 
@@ -315,21 +364,27 @@ export const actions = {
       newTodo.stateChangeDate = dateFactory().getDateNumber()
     }
 
-    if (newTodo.type === Todo.TYPE_HABIT) {
+    if (newTodo.type === Todo.TYPE.HABIT) {
       if (!stateChanged) {
         // ステータス以外は変更できないため、更新しない
         return
       }
       const habit = rootGetters['Habit/getById'](newTodo.listId)
-      const updatedHabit = calcHabitSummary(habit, oldTodo, newTodo)
+      if (!habit) {
+        console.error('対象の習慣はすでに削除されています')
+        throw new Error('更新に失敗しました')
+      }
+      const { habit: updatedHabit } = calcHabitSummary(habit, oldTodo, newTodo)
 
       await dao.update(newTodo)
       await CreateHabitDao().update(updatedHabit)
 
       commit('update', newTodo)
       commit('Habit/update', updatedHabit, { root: true })
-    } else if (await dao.update(newTodo)) {
-      commit('update', newTodo)
+    } else {
+      if (await dao.update(newTodo)) {
+        commit('update', newTodo)
+      }
     }
   },
 
@@ -361,17 +416,23 @@ export const actions = {
     }
     newTodo.stateChangeDate = dateFactory().getDateNumber()
 
-    if (newTodo.type === Todo.TYPE_HABIT) {
+    if (newTodo.type === Todo.TYPE.HABIT) {
       const habit = rootGetters['Habit/getById'](newTodo.listId)
-      const updatedHabit = calcHabitSummary(habit, oldTodo, newTodo)
+      if (!habit) {
+        console.error('対象の習慣はすでに削除されています')
+        throw new Error('更新に失敗しました')
+      }
+      const { habit: updatedHabit } = calcHabitSummary(habit, oldTodo, newTodo)
 
       await dao.update(newTodo)
       await CreateHabitDao().update(updatedHabit)
 
       commit('update', newTodo)
       commit('Habit/update', updatedHabit, { root: true })
-    } else if (await dao.update(newTodo)) {
-      commit('update', newTodo)
+    } else {
+      if (await dao.update(newTodo)) {
+        commit('update', newTodo)
+      }
     }
   }
 }

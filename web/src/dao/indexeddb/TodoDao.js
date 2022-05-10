@@ -29,11 +29,11 @@ export class TodoDao {
   async getTodaysTask (date) {
     const tasks = []
 
-    const todokey = IDBKeyRange.bound([Todo.TYPE_TODO, TaskState.Todo.value], [Todo.TYPE_TODO, TaskState.Todo.value, date])
+    const todokey = IDBKeyRange.bound([Todo.TYPE.TODO, TaskState.Todo.value], [Todo.TYPE.TODO, TaskState.Todo.value, date])
     const todos = await db.getByKeyRange(STORE_NAME, INDEX_TODAY, todokey)
     tasks.push(...todos.map(v => new Todo(v.id, v)))
 
-    const ipkey = IDBKeyRange.bound([Todo.TYPE_TODO, TaskState.InProgress.value], [Todo.TYPE_TODO, TaskState.InProgress.value, date])
+    const ipkey = IDBKeyRange.bound([Todo.TYPE.TODO, TaskState.InProgress.value], [Todo.TYPE.TODO, TaskState.InProgress.value, date])
     const ips = await db.getByKeyRange(STORE_NAME, INDEX_TODAY, ipkey)
     tasks.push(...ips.map(v => new Todo(v.id, v)))
 
@@ -46,7 +46,7 @@ export class TodoDao {
    * @returns {Promise<Todo[]>} 習慣のタスク
    */
   async getTodaysDone (date) {
-    const key = IDBKeyRange.only([Todo.TYPE_TODO, TaskState.Done.value, date])
+    const key = IDBKeyRange.only([Todo.TYPE.TODO, TaskState.Done.value, date])
     const result = await db.getByKeyRange(STORE_NAME, INDEX_DONE, key)
     return result.map(v => new Todo(v.id, v))
   }
@@ -57,7 +57,7 @@ export class TodoDao {
    * @returns {Promise<Todo[]>}
    */
   async getHabits (date) {
-    const key = IDBKeyRange.only([Todo.TYPE_HABIT, date])
+    const key = IDBKeyRange.only([Todo.TYPE.HABIT, date])
     const result = await db.getByKeyRange(STORE_NAME, INDEX_HABIT, key)
     return result.map(v => new Todo(v.id, v))
   }
@@ -73,12 +73,8 @@ export class TodoDao {
     todo.updatedAt = now
     todo.createdAt = now
 
-    const result = await db.insert(STORE_NAME, todo.getData())
-
-    return {
-      isSuccess: result,
-      value: result ? todo : null
-    }
+    await db.insert(STORE_NAME, todo.getData())
+    return todo
   }
 
   /**
@@ -100,8 +96,18 @@ export class TodoDao {
   }
 
   async update (todo) {
-    todo.updatedAt = new Date()
-    return await db.update(STORE_NAME, todo.getData())
+    const clone = Todo.valueOf(todo)
+    clone.updatedAt = new Date()
+    return await db.update(STORE_NAME, clone.getData())
+  }
+
+  async updateList (todos) {
+    const updateData = todos.map((todo) => {
+      const clone = Todo.valueOf(todo)
+      clone.updatedAt = new Date()
+      return clone.getData()
+    })
+    return await db.updateAll(STORE_NAME, updateData)
   }
 
   async delete (id) {
@@ -110,11 +116,10 @@ export class TodoDao {
 
   /**
    * 一括削除
-   * @param {Todo[]} todos
+   * @param {String[]} idlist
    * @returns
    */
-  async deleteTodos (todos) {
-    const idlist = todos.map(v => v.id)
+  async deleteTodos (idlist) {
     return await db.deleteAll(STORE_NAME, idlist)
   }
 }

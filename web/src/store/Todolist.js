@@ -69,61 +69,81 @@ export const actions = {
 
     if (lists.length > 0) {
       commit('init', lists)
-      // dispatch('todo/init', lists[0].id, { root: true })
     } else {
       // Add First List
       const list = new Todolist('', { title: 'inbox' })
-      const result = await dao.add(list.getData(), 1)
-      if (result.isSuccess) {
-        commit('init', [result.value])
-        // dispatch('todo/init', result.value.id, { root: true })
-      }
+      const todolist = await dao.add(list.getData(), 1)
+      commit('init', [todolist])
     }
     console.log('todolist init')
   },
 
-  add ({ commit, dispatch, state, getters }, params) {
-    return new Promise((resolve, reject) => {
-      if (getters.size + 1 > MAX_SIZE) {
-        reject(new Error('これ以上登録できません'))
-        return
-      }
+  async add ({ commit, dispatch, state, getters }, params) {
+    if (getters.size + 1 > MAX_SIZE) {
+      throw new Error('これ以上登録できません')
+    }
 
-      dao.add(params, state.maxIndex + 1).then((result) => {
-        if (result.isSuccess) {
-          commit('add', result.value)
-          dispatch('Todo/initNewList', result.value.id, { root: true })
-          resolve()
-        } else {
-          reject(new Error('登録に失敗しました'))
-        }
-      })
-    })
+    const todolist = await dao.add(params, state.maxIndex + 1)
+    commit('add', todolist)
+    dispatch('Todo/initNewList', todolist.id, { root: true })
   },
 
   async update ({ commit }, list) {
-    const isSuccess = await dao.update(list)
-    if (isSuccess) {
+    if (await dao.update(list)) {
       commit('update', list)
     }
   },
 
-  async delete ({ commit, state }, id) {
-    if (state.lists.length <= 1) {
+  async changeOrder ({ commit, getters }, params) {
+    const sorted = getters.getLists
+    const srcTodolist = sorted[params.oldIndex]
+    const destTodolist = sorted[params.newIndex]
+
+    const actualNewIndex = sorted.findIndex(v => v.id === destTodolist.id)
+
+    let prevOrderIndex, nextOrderIndex
+    if (params.oldIndex > params.newIndex) {
+      // 上へ移動
+      // newIndexにあったアイテムは下に移動する
+      if (actualNewIndex > 0) {
+        prevOrderIndex = sorted[actualNewIndex - 1].orderIndex
+      } else {
+        prevOrderIndex = 1
+      }
+      nextOrderIndex = destTodolist.orderIndex
+    } else {
+      // 下へ移動
+      // newIndexにあったアイテムは上に移動する
+      prevOrderIndex = destTodolist.orderIndex
+      if (sorted.length - 1 > actualNewIndex) {
+        nextOrderIndex = sorted[actualNewIndex + 1].orderIndex
+      } else {
+        nextOrderIndex = Math.ceil(destTodolist.orderIndex) + 1
+      }
+    }
+
+    // NOTE: 並び替えは前後のorderから算出
+    //  firebaseで複雑なsortができないため
+    const newOrderIndex = (prevOrderIndex + nextOrderIndex) / 2
+
+    if (newOrderIndex !== destTodolist.orderIndex) {
+      srcTodolist.orderIndex = newOrderIndex
+      if (await dao.update(srcTodolist)) {
+        commit('update', srcTodolist)
+      }
+    }
+  },
+
+  async delete ({ commit, getters }, id) {
+    if (getters.size <= 1) {
       throw new Error('これ以上削除できません')
     }
 
-    try {
-      await dao.delete(id)
-
+    if (await dao.delete(id)) {
       const todoDao = CreateTodoDao()
       const todos = await todoDao.getTodos(id)
-      await todoDao.deleteTodos(todos)
-
+      await todoDao.deleteTodos(todos.map(v => v.id))
       commit('delete', id)
-    } catch (error) {
-      console.error(error)
-      throw new Error('削除できませんでした')
     }
   }
 }

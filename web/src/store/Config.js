@@ -19,34 +19,27 @@ export const getters = {
 
 export const mutations = {
   init (state, config) {
-    state.config = config
+    Object.assign(state.config, config)
   },
 
   update (state, config) {
-    state.config = config
+    Object.assign(state.config, config)
   }
 }
 
 export const actions = {
   async init ({ commit }) {
-    try {
-      const configList = await dao.get()
+    const configList = await dao.get()
 
-      let config = null
+    let config
 
-      if (configList.length > 0) {
-        config = configList[0]
-      } else {
-        const result = await dao.add()
-        if (result.isSuccess) {
-          config = result.value
-        }
-      }
-
-      commit('init', config)
-    } catch (error) {
-      console.error(error)
+    if (configList.length > 0) {
+      config = configList[0]
+    } else {
+      config = await dao.add(userId)
     }
+
+    commit('init', config)
 
     console.log('config init')
   },

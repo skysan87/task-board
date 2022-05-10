@@ -1,29 +1,39 @@
 <template>
-  <div :class="{'move-icon': option.showPointer}">
-    <div class="flex w-full">
-      <div v-if="option.showPointer" class="p-1">
-        <fa :icon="['fas', 'ellipsis-v']" />
-      </div>
-      <div v-show="option.showEdit == false" class="p-1" @click="changeEventHandler">
-        <span
-          :style="badgeColor(todo.state)"
-          class="circle-button cursor-pointer"
-        />
-      </div>
-      <div class="flex-1 no-wrap text-left p-1">
-        {{ todo.title }}
-      </div>
-      <div v-show="option.showEdit == false" class="p-1" @click.stop="editEventHandler">
-        <fa :icon="['fas', 'edit']" size="xs" class="cursor-pointer" />
-      </div>
-      <div
-        v-show="option.showEdit && canRemove"
-        class="todo-x-pointer p-1"
-        @click="removeEventHandler"
-      >
-        <span class="cursor-pointer">×</span>
-      </div>
+  <div
+    class="box flex items-center w-full"
+    @click.stop="handleSelect"
+  >
+    <fa
+      v-if="option.showPointer"
+      :icon="['fas', 'ellipsis-v']"
+      class="move-icon px-1"
+    />
+    <div
+      v-show="option.showEdit == false"
+      class="px-1"
+      @click.stop="changeEventHandler"
+    >
+      <span
+        :style="badgeColor(todo.state)"
+        class="circle-button cursor-pointer"
+      />
     </div>
+    <div class="no-wrap flex-1 text-left p-1">
+      {{ todo.title }}
+    </div>
+    <span v-show="isExpired" class="text-red-500 px-1 font-bold" title="期限切れ">!</span>
+    <fa
+      v-show="option.showEdit == false"
+      title="編集"
+      :icon="['fas', 'edit']"
+      size="xs"
+      class="cursor-pointer px-1"
+      @click.stop="editEventHandler"
+    />
+    <fa
+      v-show="option.showEdit && isSelected"
+      :icon="['fas', 'circle-check']"
+    />
   </div>
 </template>
 
@@ -49,19 +59,36 @@ export default {
           showEdit: true
         }
       }
+    },
+    isSelected: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {}
   },
   computed: {
-    canRemove () {
-      return this.$store.getters['Todo/canRemove']
+    editMode () {
+      return this.$store.getters['Todo/editMode']
+    },
+
+    isExpired () {
+      if (!this.todo.enddate) {
+        return false
+      } else {
+        const num = this.$store.getters['View/getDate']
+        return this.todo.enddate < num
+      }
     }
   },
   methods: {
     changeEventHandler () {
       this.$store.dispatch('Todo/changeState', this.todo.id)
+        .catch((error) => {
+          console.log(error)
+          this.$toast.error('更新に失敗しました')
+        })
     },
     badgeColor (state) {
       return getStateColor(state)
@@ -69,8 +96,8 @@ export default {
     editEventHandler () {
       this.$emit('edit', this.todo.id)
     },
-    removeEventHandler () {
-      this.$store.dispatch('Todo/delete', this.todo.id)
+    handleSelect () {
+      this.$emit('select', this.todo.id)
     }
   }
 }
@@ -82,8 +109,13 @@ export default {
 }
 
 .no-wrap {
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.box:active {
+  opacity: 0.4;
 }
 </style>

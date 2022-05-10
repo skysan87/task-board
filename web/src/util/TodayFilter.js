@@ -1,7 +1,7 @@
 export const TodayFilter = {
   List: {
     value: 'list',
-    label: 'リスト'
+    label: '今日のタスク'
   },
   Schedule: {
     value: 'schedule',

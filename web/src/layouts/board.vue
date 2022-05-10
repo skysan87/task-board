@@ -1,36 +1,22 @@
 <template>
   <transition name="layout" mode="out-in">
-    <div class="app-container">
+    <div class="app-container select-none" :style="widthStyle">
       <div class="app-top_nav bg-green-400 text-center">
         {{ globalMessage }}
       </div>
       <div class="app-workspace-layout">
         <div class="app-workspace__sidebar">
-          <div class="app-workspace__task_sidebar flex flex-col flex-none bg-gray-800 pt-3 text-gray-500">
-            <div
-              class="flex justify-between items-center px-4 cursor-pointer pb-1"
-              @click.left="(isMenuExpanded = !isMenuExpanded)"
-            >
-              <h1 class="font-semibold text-xl leading-tight">
-                <span>To-Do List</span>
-                <span class="pl-1 text-xs">v{{ appVersion }}</span>
-              </h1>
-              <fa :icon="['fas', 'caret-down']" :class="{'fa-rotate-180': isMenuExpanded}" />
-            </div>
-            <div v-show="isMenuExpanded" class="flex-none">
-              <!-- <a class="block px-6 pt-1 hover:bg-blue-800 hover:opacity-75 cursor-pointer" @click.left="logout">
-                <fa :icon="['fas', 'sign-out-alt']" size="lg" class="text-gray-600" />
-                <span class="pl-1">ログアウト</span>
-              </a> -->
-            </div>
-
+          <div class="app-workspace__task_sidebar flex flex-col flex-none bg-gray-800 pt-3 text-white">
+            <h1 class="font-semibold text-xl leading-tight px-4 pb-1 cursor-pointer">
+              <span class="font-mono">{{ currentDate }}</span>
+            </h1>
             <!-- border -->
             <div class="border-b border-gray-600 pt-1" />
 
             <div class="flex-1 py-4 overflow-y-scroll scrollable-container">
               <div class="mt-5 px-4 flex items-center">
                 <div class="font-bold text-lg">
-                  今日の予定
+                  サマリ
                 </div>
               </div>
               <div
@@ -46,7 +32,12 @@
                 <div class="font-bold text-lg">
                   プロジェクト
                 </div>
-                <fa :icon="['far', 'plus-square']" class="cursor-pointer" @click.left="openListDialog" />
+                <fa
+                  :icon="['far', 'plus-square']"
+                  class="cursor-pointer"
+                  title="プロジェクトを追加する"
+                  @click.left="openListDialog"
+                />
               </div>
               <div
                 v-for="todolist in todolists"
@@ -67,7 +58,12 @@
                   :class="{'opacity-100': activeItemId === todolist.id}"
                   @click.left.prevent="editTodolist(todolist.id)"
                 >
-                  <fa :icon="['fas', 'edit']" size="xs" class="cursor-pointer" />
+                  <fa
+                    :icon="['fas', 'edit']"
+                    size="xs"
+                    class="cursor-pointer"
+                    title="プロジェクトを編集する"
+                  />
                 </div>
               </div>
               <div class="mt-5 px-4 flex justify-between items-center">
@@ -79,7 +75,7 @@
                 <div
                   v-for="habitfilter in habitFilters"
                   :key="habitfilter.value"
-                  class="py-1 px-5 cursor-pointer  hover:bg-blue-700 hover:opacity-75"
+                  class="py-1 px-5 cursor-pointer hover:bg-blue-700 hover:opacity-75"
                   :class="{'bg-blue-700' : (selectedType === viewType.Habit && currentFilter === habitfilter.value)}"
                   @click.left="onSelectHabit(habitfilter.value)"
                 >
@@ -100,8 +96,20 @@
             </div>
           </div>
         </div>
+
+        <div
+          class="dragSidebar h-screen"
+          :style="{ left: (sidewidth - 3) + 'px' }"
+          @mousedown="dragStartSidebar($event)"
+          @mousemove="draggingSidebar($event)"
+        />
+
         <div class="app-workspace__view">
           <nuxt />
+        </div>
+
+        <div class="app-workspace__view-2">
+          <component :is="subPanel" />
         </div>
       </div>
     </div>
@@ -110,17 +118,28 @@
 
 <script>
 import Vue from 'vue'
+import draggable from 'vuedraggable'
 import NewListDialog from '@/components/NewListDialog'
 import InputDialog from '@/components/InputDialog'
+import ExpandPanel from '@/components/parts/ExpandPanel'
 import { HabitFilter } from '@/util/HabitFilter'
 import { TodayFilter } from '@/util/TodayFilter'
+import { dateFactory } from '@/util/DateFactory'
 import Db from '@/plugins/db'
 
 const DialogController = Vue.extend(NewListDialog)
 const InputDialogController = Vue.extend(InputDialog)
 const viewType = { Todo: 0, Habit: 1, Today: 2 }
 
+const MIN_SIDEBAR_WIDTH = 180
+const MAX_SIDEBAR_WIDTH_MARGIN = 255
+
 export default {
+  components: {
+    draggable,
+    ExpandPanel,
+    TodoDetail: () => import('@/components/TodoDetail')
+  },
   data () {
     return {
       isMenuExpanded: false,
@@ -132,7 +151,11 @@ export default {
       dialog: null,
       inputDialog: null,
       currentListId: '',
-      appVersion: process.env.app_version
+      appVersion: process.env.app_version,
+      sidewidth: 240,
+      isDragging: false,
+      clientWidth: 0,
+      currentDate: dateFactory().format('YYYY.M.D(ddd)')
     }
   },
   computed: {
@@ -166,16 +189,44 @@ export default {
           return viewType.Today
         }
       }
+    },
+    subPanel () {
+      return this.$store.getters['View/subPanelName']
+    },
+    widthStyle () {
+      return {
+        '--sidebar-width': this.sidewidth + 'px',
+        '--sidepanel-width': this.subPanel !== '' ? '25vw' : '0'
+      }
     }
   },
-  async mounted () {
-    await Db.init()
-    await this.$store.dispatch('Config/init')
-    await this.$store.dispatch('Habit/init')
-    await this.$store.dispatch('Todolist/init')
-    // TODO: 選択されている: selectedTodayFilter
+
+  mounted () {
+    window.addEventListener('mouseup', this.dragEndSidebar, false)
+    window.addEventListener('mousemove', this.draggingSidebar, false)
+    window.addEventListener('resize', this.resizeSidebar, false)
+    this.init()
   },
+
+  destroyed () {
+    window.removeEventListener('mouseup', this.dragEndSidebar, false)
+    window.removeEventListener('mousemove', this.draggingSidebar, false)
+    window.removeEventListener('resize', this.resizeSidebar, false)
+  },
+
   methods: {
+    async init () {
+      try {
+        await Db.init()
+        await this.$store.dispatch('Config/init')
+        await this.$store.dispatch('Habit/init')
+        await this.$store.dispatch('Todolist/init')
+      } catch (error) {
+        console.error(error)
+        this.$toast.error('初期化に失敗しました')
+      }
+    },
+
     onSelectToday (filter) {
       this.selectedTodayFilter = filter
       this.$router.push(`/today/${filter}`)
@@ -186,6 +237,10 @@ export default {
     },
     onSelectHabit (filter) {
       this.$store.dispatch('Habit/changeFilter', filter)
+        .catch((error) => {
+          console.error(error)
+          this.$toast.error('System Error')
+        })
     },
     openListDialog () {
       delete this.dialog
@@ -210,6 +265,10 @@ export default {
       })
       this.dialog.$on('add', (todolist) => {
         this.$store.dispatch('Todolist/update', todolist)
+          .catch((error) => {
+            console.error(error)
+            this.$toast.error('登録に失敗しました')
+          })
       })
       this.dialog.$on('deleteList', () => {
         this.$store.dispatch('Todolist/delete', listId)
@@ -220,7 +279,8 @@ export default {
             this.$router.push(`/todolist/${firstListId}`)
           })
           .catch((error) => {
-            this.$toast.error(error.message)
+            console.error(error)
+            this.$toast.error('削除に失敗しました')
           })
       })
       this.dialog.$mount()
@@ -235,7 +295,8 @@ export default {
           this.$router.push(`/todolist/${listId}`)
         })
         .catch((error) => {
-          this.$toast.error(error.message)
+          console.error(error)
+          this.$toast.error('登録に失敗しました')
         })
     },
     updateHeaderText () {
@@ -249,8 +310,51 @@ export default {
       })
       this.inputDialog.$on('update', (message) => {
         this.$store.dispatch('Config/updateMessage', message)
+          .then(() => {
+            this.$toast.success('更新しました')
+          })
+          .catch((error) => {
+            console.error(error)
+            this.$toast.error('更新に失敗しました')
+          })
       })
       this.inputDialog.$mount()
+    },
+
+    /**
+     * サイドメニュー ドラッグ開始
+     */
+    dragStartSidebar () {
+      this.isDragging = true
+      this.clientWidth = window.innerWidth
+    },
+
+    /**
+     * サイドメニュー ドラッグ中
+     */
+    draggingSidebar (ev) {
+      if (this.isDragging) {
+        if (ev.pageX > (this.clientWidth - MAX_SIDEBAR_WIDTH_MARGIN)) {
+          this.sidewidth = this.clientWidth - MAX_SIDEBAR_WIDTH_MARGIN
+        } else if (ev.pageX < MIN_SIDEBAR_WIDTH) {
+          this.sidewidth = MIN_SIDEBAR_WIDTH
+        } else {
+          this.sidewidth = ev.pageX
+        }
+      }
+    },
+
+    /**
+     * サイドメニュー ドラッグ終了
+     */
+    dragEndSidebar () {
+      this.isDragging = false
+    },
+
+    resizeSidebar () {
+      if (this.sidewidth >= window.innerWidth) {
+        this.sidewidth = window.innerWidth - MAX_SIDEBAR_WIDTH_MARGIN
+      }
     }
   }
 }
@@ -288,10 +392,11 @@ export default {
   grid-area: app-container__workspace;
   display: grid;
   overflow: hidden;
-  grid-template-columns: 230px calc(100% - 230px);
+  position: relative; /* dragSidebar */
+  grid-template-columns: var(--sidebar-width) auto var(--sidepanel-width);
   grid-template-rows: 100%;
   grid-template-areas:
-    "app-workspace__sidebar app-workspace__view";
+    "app-workspace__sidebar app-workspace__view app-workspace__view-2";
 }
 
 .app-workspace__sidebar {
@@ -314,5 +419,40 @@ export default {
 
 .app-workspace__view {
   grid-area: app-workspace__view;
+}
+
+.app-workspace__view-2 {
+  grid-area: app-workspace__view-2;
+  max-width: 30vw;
+  min-height: 0;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.dragSidebar {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background .3s;
+  content: '';
+  user-select: none;
+}
+
+.dragSidebar:hover {
+  background: skyblue;
+}
+
+/* ドラッグするアイテム */
+.sortable-chosen {
+  opacity: 0.3;
+}
+
+.sortable-ghost {
+  background-color: #979797;
 }
 </style>
