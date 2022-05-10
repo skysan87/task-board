@@ -16,12 +16,9 @@ export class TodolistDao {
     list.createdAt = now
     list.updatedAt = now
 
-    const result = await db.insert(STORE_NAME, list.getData())
+    await db.insert(STORE_NAME, list.getData())
 
-    return {
-      isSuccess: result,
-      value: result ? list : null
-    }
+    return list
   }
 
   async update (list) {

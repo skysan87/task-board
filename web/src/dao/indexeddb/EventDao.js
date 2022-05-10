@@ -20,12 +20,8 @@ export class EventDao {
     event.createdAt = now
     event.updatedAt = now
 
-    const result = await db.insert(STORE_NAME, event.getData())
-
-    return {
-      isSuccess: result,
-      value: result ? event : null
-    }
+    await db.insert(STORE_NAME, event.getData())
+    return event
   }
 
   async update (event) {

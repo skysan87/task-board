@@ -56,6 +56,10 @@ const devConfig = {
 
   axios: {},
 
+  router: {
+    middleware: ['viewstate']
+  },
+
   build: {
   },
   toast: {

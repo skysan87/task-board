@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex" @click.left="isExpanded = !isExpanded">
+    <div class="flex items-center" @click.left="isExpanded = !isExpanded">
       <fa v-if="isLeftVisible" :icon="['fas', 'caret-down']" :class="{'fa-rotate-180': isExpanded}" class="mr-1" />
       <slot name="title" />
       <fa v-if="isRightVisible" :icon="['fas', 'caret-down']" :class="{'fa-rotate-180': isExpanded}" class="ml-1" />

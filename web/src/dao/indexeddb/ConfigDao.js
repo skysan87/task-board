@@ -21,12 +21,9 @@ export class ConfigDao {
     config.createdAt = now
     config.updatedAt = now
 
-    const result = await db.insert(STORE_NAME, config.getData())
+    await db.insert(STORE_NAME, config.getData())
 
-    return {
-      isSuccess: result,
-      value: result ? config : null
-    }
+    return config
   }
 
   async update (config) {

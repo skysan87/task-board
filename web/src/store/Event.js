@@ -38,10 +38,7 @@ export const actions = {
       if (eventList.length > 0) {
         event = eventList[0]
       } else {
-        const result = await dao.add(dateString)
-        if (result.isSuccess) {
-          event = result.value
-        }
+        event = await dao.add(dateString)
       }
 
       commit('init', event)

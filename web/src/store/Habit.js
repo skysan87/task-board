@@ -99,23 +99,15 @@ export const actions = {
     console.log('habit init')
   },
 
-  add ({ commit, getters, state }, params) {
+  async add ({ commit, getters, state }, params) {
     params.orderIndex = state.maxIndex + 1
 
-    return new Promise((resolve, reject) => {
-      if (getters.size + 1 > MAX_SIZE) {
-        reject(new Error('これ以上登録できません'))
-        return
-      }
-      dao.add(params).then((result) => {
-        if (result.isSuccess) {
-          commit('add', result.value)
-          resolve()
-        } else {
-          reject(new Error('登録に失敗しました'))
-        }
-      })
-    })
+    if (getters.size + 1 > MAX_SIZE) {
+      throw new Error('これ以上登録できません')
+    }
+
+    const habit = await dao.add(params)
+    commit('add', habit)
   },
 
   async update ({ commit }, habit) {

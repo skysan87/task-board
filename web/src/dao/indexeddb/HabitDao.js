@@ -15,12 +15,9 @@ export class HabitDao {
     habit.createdAt = now
     habit.updatedAt = now
 
-    const result = await db.insert(STORE_NAME, habit.getData())
+    await db.insert(STORE_NAME, habit.getData())
 
-    return {
-      isSuccess: result,
-      value: result ? habit : null
-    }
+    return habit
   }
 
   async update (habit) {

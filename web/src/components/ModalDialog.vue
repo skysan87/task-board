@@ -8,9 +8,9 @@
         <div class="modal-body">
           <label class="input-label">ステータス</label>
           <div class="flex justify-evenly">
-            <label v-for="viewOp in options" :key="viewOp.value">
+            <label v-for="viewOp in options" :key="viewOp.value" class="flex items-center">
               <input v-model="todo.state" type="radio" :value="viewOp.value">
-              <span class="ml-2 align-middle">{{ viewOp.label }}</span>
+              <span class="ml-2">{{ viewOp.label }}</span>
             </label>
           </div>
         </div>
@@ -141,6 +141,29 @@
           />
         </div>
 
+        <div v-if="!isCreateMode" class="modal-body">
+          <label class="input-label">詳細情報</label>
+          <div class="flex flex-wrap">
+            <div class="px-1 m-1 border">
+              <span class="text-xs">登録日:</span>
+              <span class="text-xs ml-1">{{ todo.createdAt | dtFormat }}</span>
+            </div>
+            <div class="px-1 m-1 border">
+              <span class="text-xs">更新日:</span>
+              <span class="text-xs ml-1">{{ todo.updatedAt | dtFormat }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="todo.type === 'todo'" class="modal-body">
+          <label class="input-label">アクション</label>
+          <div class="flex flex-wrap">
+            <button class="block px-1 m-1 btn btn-outline" @click="setTodayInRange">
+              今日の予定に設定
+            </button>
+          </div>
+        </div>
+
         <div class="flex flex-row-reverse">
           <button v-if="isCreateMode" class="btn btn-regular ml-2" @click="add">
             Add
@@ -182,6 +205,20 @@ export default {
   components: {
     SubTaskInput
   },
+
+  filters: {
+    /**
+     * @param {Date} value
+     * @return {String}
+     */
+    dtFormat (value) {
+      if (!value) {
+        return ''
+      }
+      return dateFactory(value).format('YYYY/MM/DD')
+    }
+  },
+
   props: {
     parent: {
       type: Element,
@@ -229,7 +266,7 @@ export default {
   },
   computed: {
     isTypeTodo () {
-      return this.todo.type === Todo.TYPE_TODO
+      return this.todo.type === Todo.TYPE.TODO
     },
     subtaskDoneCount () {
       return this.todo.subTasks.filter(t => t.isDone).length
@@ -255,7 +292,7 @@ export default {
       }
 
       // 編集の禁止
-      if (this.todo.type === Todo.TYPE_HABIT) {
+      if (this.todo.type === Todo.TYPE.HABIT) {
         this.forbid.title = true
         this.forbid.detail = true
         this.forbid.range = true
@@ -305,17 +342,24 @@ export default {
     cancel () {
       this.$destroy()
     },
+
     checkFocus (ev) {
       if (ev.target !== null && ev.target.className === 'dummy') {
         this.$refs.title.focus()
       }
     },
     deleteTodo () {
+      if (!confirm('削除しますか？')) {
+        return
+      }
       this.$emit('delete', this.todo.id)
       this.$destroy()
     },
     initRange () {
       this.range = { start: null, end: null }
+    },
+    setTodayInRange () {
+      this.range = { start: new Date(), end: new Date() }
     },
     addSubTask (data) {
       this.todo.subTasks.push(data)

@@ -42,6 +42,46 @@
               <span class="p-1 align-middle">{{ label }}</span>
             </label>
           </div>
+          <div>
+            <label>
+              <input v-model="habit.frequency" name="frequency" type="radio" :value="FREQ_MONTHLY">
+              <span>毎月</span>
+            </label>
+            <span v-show="habit.frequency === FREQ_MONTHLY" class="flex flex-col">
+              <div>
+                <label class="ml-4 my-1">
+                  <input v-model="monthlyType" type="radio" :value="MONTHLY_TYPE.DAY">
+                  <span>日付で指定</span>
+                </label>
+                <!-- TODO: 複数日対応 -->
+                <select v-model="planDays" class="ml-4 px-1 bg-gray-200">
+                  <option v-for="day of 31" :key="day" :value="day">{{ day }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="ml-4 my-1">
+                  <input v-model="monthlyType" type="radio" :value="MONTHLY_TYPE.WEEK">
+                  <span>週と曜日</span>
+                </label>
+                <div class="inline-block ml-4">
+                  <span>第</span>
+                  <select v-model="planWeek.index" class="px-1 bg-gray-200">
+                    <option v-for="id of 4" :key="id" :value="id">{{ id }}</option>
+                  </select>
+                  <select v-model="planWeek.day" class="px-1 bg-gray-200">
+                    <option v-for="(label, id) of weekdays" :key="id" :value="id">{{ label }}</option>
+                  </select>
+                  <span>曜日</span>
+                </div>
+              </div>
+              <div>
+                <label class="ml-4 my-1">
+                  <input v-model="monthlyType" type="radio" :value="MONTHLY_TYPE.END">
+                  <span>月末</span>
+                </label>
+              </div>
+            </span>
+          </div>
           <p class="text-red-500 text-xs italic">
             <span>{{ errorMsg.frequency }}</span>
           </p>
@@ -72,6 +112,13 @@
           <button class="btn btn-outline ml-2" @click="cancel">
             Cancel
           </button>
+          <button
+            v-if="!isCreateMode"
+            class="btn btn-red-outline ml-2"
+            @click="deleteHabit"
+          >
+            Delete
+          </button>
           <span v-if="!isCreateMode" class="text-xs text-gray-600 flex-1">
             変更や削除は明日以降のタスクに反映されます。
           </span>
@@ -93,11 +140,13 @@ export default {
   props: {
     parent: {
       type: Element,
-      require: true
+      require: true,
+      default: null
     },
     target: {
-      type: Habit,
-      require: true
+      type: Object,
+      require: true,
+      default: () => new Habit('', {})
     },
     isCreateMode: {
       type: Boolean,
@@ -105,13 +154,20 @@ export default {
     }
   },
   data () {
+    const clone = Habit.valueOf(this.target)
     return {
-      habit: new Habit('', {}),
+      habit: clone,
       errorMsg: { title: '', frequency: '' },
       weekdays: Habit.WEEKDAYS,
       FREQ_DAILY: Habit.FREQ_DAILY,
       FREQ_WEEKLY: Habit.FREQ_WEEKLY,
-      calenderAttributes: []
+      FREQ_MONTHLY: Habit.FREQ_MONTHLY,
+      calenderAttributes: [],
+      MONTHLY_TYPE: { ...Habit.MONTHLY_TYPE },
+      monthlyType: clone.monthlyType || Habit.MONTHLY_TYPE.DAY,
+      // TODO: 複数日対応
+      planDays: clone.planDays.length > 0 ? clone.planDays[0] : 1,
+      planWeek: clone.planWeek || { index: 1, day: 0 }
     }
   },
   computed: {
@@ -134,17 +190,17 @@ export default {
   },
   methods: {
     init () {
-      Object.assign(this.habit, this.target)
       this.errorMsg = { title: '', frequency: '' }
       this.initCalendar()
     },
+
     update () {
-      if (this.habit.frequency === Habit.FREQ_DAILY) {
-        this.habit.weekdays = []
-      }
       if (!this.validate()) {
         return
       }
+
+      this.setFrequencyOptions()
+
       if (this.isCreateMode) {
         this.$emit('add', this.habit)
       } else {
@@ -152,9 +208,60 @@ export default {
       }
       this.$destroy()
     },
+
+    setFrequencyOptions () {
+      switch (this.habit.frequency) {
+        case Habit.FREQ_DAILY:
+          this.habit.weekdays = []
+          this.habit.monthlyType = null
+          this.habit.planDays = []
+          this.habit.planWeek = null
+          break
+        case Habit.FREQ_WEEKLY:
+          this.habit.monthlyType = null
+          this.habit.planDays = []
+          this.habit.planWeek = null
+          break
+        case Habit.FREQ_MONTHLY:
+          this.habit.weekdays = []
+          this.habit.monthlyType = this.monthlyType
+          switch (this.habit.monthlyType) {
+            case Habit.MONTHLY_TYPE.DAY:
+              // TODO: 複数日対応
+              this.habit.planDays = [this.planDays]
+              this.habit.planWeek = null
+              break
+            case Habit.MONTHLY_TYPE.WEEK:
+              this.habit.planDays = []
+              this.habit.planWeek = {
+                index: parseInt(this.planWeek.index),
+                day: parseInt(this.planWeek.day)
+              }
+              break
+            case Habit.MONTHLY_TYPE.END:
+            default:
+              this.habit.planDays = []
+              this.habit.planWeek = null
+              break
+          }
+          break
+        default:
+          break
+      }
+    },
+
     cancel () {
       this.$destroy()
     },
+
+    deleteHabit () {
+      if (!confirm('この習慣を削除しますか？')) {
+        return
+      }
+      this.$emit('delete', this.habit)
+      this.$destroy()
+    },
+
     checkFocus (ev) {
       if (ev.target !== null && ev.target.className === 'dummy') {
         this.$refs.refTitle.focus()
