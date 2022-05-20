@@ -1,8 +1,14 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron')
+const { app, BrowserWindow, Tray, Menu, BrowserView } = require('electron')
 const path = require('path')
 const { registerIpcListener } = require('./ipcListener.js')
 
 const ICON = path.resolve(__dirname, '../img/icon_16px.png') //16px
+
+const titlebarHight = 28
+
+const is_windows = process.platform === 'win32'
+const is_mac = process.platform === 'darwin'
+// const is_linux = process.platform ==='linux'
 
 let win
 let tray
@@ -13,6 +19,7 @@ async function createWindow () {
     height: 600,
     autoHideMenuBar: true,
     useContentSize: true,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -23,15 +30,23 @@ async function createWindow () {
   })
 
   if (process.env.NODE_ENV === 'dev') {
-    win.loadURL('http://localhost:3000/')
-
-    win.webContents.openDevTools()
+    await setupView('http://localhost:3000/')
   } else {
     // production構成時
-    await win.loadFile(path.resolve(__dirname, '../../dist/index.html'))
+    await setupViewLocal(path.resolve(__dirname, '../../dist/index.html'))
   }
 
+  const titlebar = is_windows ? 'titlebar_win.html' : 'titlebar_mac.html'
+  win.loadFile(path.resolve(__dirname, titlebar))
+  // win.webContents.openDevTools({ mode: 'detach' })
+
   registerIpcListener(win)
+
+  win.on('resize', () => {
+    win.getBrowserViews().forEach((view) => {
+      resizeView(view)
+    })
+  })
 
   win.on('close', e => {
     e.preventDefault()
@@ -90,4 +105,38 @@ const createTray = () => {
 
 const toggleWindow = () => {
   win.isVisible() ? win.hide() : win.show()
+}
+
+const setupView = async (url) => {
+  const view = new BrowserView({
+      webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      worldSafeExecuteJavaScript: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+  win.addBrowserView(view)
+  resizeView(view)
+  await view.webContents.loadURL(url)
+}
+
+const setupViewLocal = async (file) => {
+  const view = new BrowserView({
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      worldSafeExecuteJavaScript: true,
+      webSecurity: false, // ローカルファイルの読込許可
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+  win.addBrowserView(view)
+  resizeView(view)
+  await view.webContents.loadFile(file)
+}
+
+function resizeView(view) {
+  const bound = win.getBounds()
+  view.setBounds({ x: 0, y: titlebarHight, width: bound.width, height: bound.height - titlebarHight })
 }
