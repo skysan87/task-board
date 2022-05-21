@@ -214,8 +214,7 @@ export default {
       this.miniMode = false
       electron.resizeWindow({
         width: 800,
-        height: 600,
-        alwaysOnTop: false
+        height: 600
       })
     },
 
@@ -223,16 +222,14 @@ export default {
       this.miniMode = true
       electron.resizeWindow({
         width: 300,
-        height: 240,
-        alwaysOnTop: true
+        height: 240
       })
     },
 
     boBack () {
       electron.resizeWindow({
         width: 800,
-        height: 600,
-        alwaysOnTop: false
+        height: 600
       })
       this.$router.push('/today/schedule')
     }
