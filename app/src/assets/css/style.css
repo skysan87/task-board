@@ -5,7 +5,7 @@
   --button-sticky-color: orange;
 }
 
-body {
+.drag-area {
   /* ウィンドウの移動 */
   -webkit-app-region: drag;
   -webkit-user-select: none;
