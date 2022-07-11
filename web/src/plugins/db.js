@@ -258,6 +258,45 @@ class Db {
   }
 
   /**
+   * データ更新(特定の項目のみ更新)
+   * @param {String} storeName テーブル名
+   * @param {Array} updateItems 更新するデータ
+   * @returns {Promise<Boolean>}
+   */
+  updateOnlyChangedFields (storeName, updateItems) {
+    return new Promise((resolve, reject) => {
+      this.getInstance().then((db) => {
+        try {
+          const tx = db.transaction(storeName, 'readwrite')
+          const store = tx.objectStore(storeName)
+          for (const item of updateItems) {
+            const request = store.openCursor(IDBKeyRange.only(item.id))
+            request.onsuccess = () => {
+              const cursor = request.result
+              if (cursor) {
+                Object.entries(item).forEach(([key, value]) => {
+                  cursor.value[key] = value
+                })
+                cursor.update(cursor.value)
+                cursor.continue()
+              }
+            }
+          }
+
+          tx.onerror = () => {
+            reject(tx.error)
+          }
+          tx.oncomplete = () => {
+            resolve(true)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+  }
+
+  /**
    * データ削除
    * @param {String} storeName テーブル名
    * @param {String} key 削除するキー
