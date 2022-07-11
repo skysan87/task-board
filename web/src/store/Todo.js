@@ -167,6 +167,12 @@ export const mutations = {
     Object.assign(state.todos[index], payload)
   },
 
+  updateDeadline (state, payload) {
+    const todo = state.todos.find(v => v.id === payload.id)
+    todo.startdate = payload.startdate
+    todo.enddate = payload.enddate
+  },
+
   deleteTodos (state, targetIds) {
     state.todos = state.todos.filter(t => targetIds.includes(t.id) === false)
     checkSelected(state)
@@ -337,18 +343,9 @@ export const actions = {
     }
   },
 
-  async setDeadline ({ commit, state }, { ids, startDate, endDate }) {
-    const targets = state.todos.filter(t => ids.includes(t.id))
-      .map((t) => {
-        return {
-          ...t,
-          startdate: startDate,
-          enddate: endDate
-        }
-      })
-
-    if (await dao.updateList(targets)) {
-      targets.forEach(t => commit('update', t))
+  async setDeadline ({ commit }, targets) {
+    if (await dao.updateDeadlines(targets)) {
+      targets.forEach(t => commit('updateDeadline', t))
     }
   },
 
