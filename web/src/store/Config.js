@@ -36,7 +36,7 @@ export const actions = {
     if (configList.length > 0) {
       config = configList[0]
     } else {
-      config = await dao.add(userId)
+      config = await dao.add()
     }
 
     commit('init', config)
