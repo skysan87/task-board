@@ -110,6 +110,20 @@ export class TodoDao {
     return await db.updateAll(STORE_NAME, updateData)
   }
 
+  /**
+   * 期間の変更
+   * @param {Array<{id: String, startdate: Number, enddate: Number}>} targets
+   */
+  async updateDeadlines (targets) {
+    const updateDatas = targets.map((t) => {
+      return {
+        ...t,
+        updatedAt: new Date()
+      }
+    })
+    return await db.updateOnlyChangedFields(STORE_NAME, updateDatas)
+  }
+
   async delete (id) {
     return await db.delete(STORE_NAME, id)
   }

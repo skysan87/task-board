@@ -21,10 +21,15 @@ class Wrapper {
    * @param {string} format
    */
   constructor (date = null, format) {
+    if (date instanceof dayjs) {
+      this.instance = date
+      return
+    }
+
     if (!date) {
       this.instance = dayjs()
-    } else if (!format && typeof date === 'string' && /^[0-9]{8}$/.test(date)) {
-      this.instance = dayjs(date, 'YYYYMMDD')
+    } else if (!format && (typeof date === 'string' || typeof date === 'number') && /^[0-9]{8}$/.test(date.toString())) {
+      this.instance = dayjs(date.toString(), 'YYYYMMDD')
     } else if (!format && date) {
       this.instance = dayjs(date)
     } else {
@@ -41,8 +46,7 @@ class Wrapper {
    * @returns {Wrapper} インスタンス
    */
   add (value, unit = null) {
-    this.instance = this.instance.add(value, unit)
-    return this
+    return new Wrapper(this.instance.add(value, unit))
   }
 
   /**
@@ -52,12 +56,25 @@ class Wrapper {
    * @returns {Wrapper} インスタンス
    */
   subtract (value, unit = null) {
-    this.instance = this.instance.subtract(value, unit)
-    return this
+    return new Wrapper(this.instance.subtract(value, unit))
   }
 
   addDay (value) {
     return this.add(value, 'day')
+  }
+
+  getFirstDayOfMonth () {
+    return new Wrapper(this.instance.startOf('month'))
+  }
+
+  getEndDayOfMonth () {
+    // 00:00
+    return new Wrapper(this.instance.endOf('month').startOf('date'))
+  }
+
+  resetTime () {
+    // 00:00
+    return new Wrapper(this.instance.startOf('date'))
   }
   /* ==== Method Chain ==== */
 
@@ -100,5 +117,9 @@ class Wrapper {
    */
   getWeekIndex () {
     return Math.ceil(this.instance.get('date') / 7)
+  }
+
+  diff (dateObj, unit) {
+    return this.instance.diff(dateObj.instance, unit)
   }
 }

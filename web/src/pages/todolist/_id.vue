@@ -213,11 +213,18 @@ export default {
         this.selectedIds.length > 0 &&
         confirm('期限を設定しますか？')
       ) {
-        this.$store.dispatch('Todo/setDeadline', {
-          ids: this.selectedIds,
-          startDate: dateFactory(targetDate.start).getDateNumber(),
-          endDate: dateFactory(targetDate.end).getDateNumber()
-        })
+        const startDateNum = dateFactory(targetDate.start).getDateNumber()
+        const endDateNum = dateFactory(targetDate.end).getDateNumber()
+        const targets = this.filteredTodos
+          .filter(t => this.selectedIds.includes(t.id))
+          .map((t) => {
+            return {
+              id: t.id,
+              startdate: startDateNum,
+              enddate: endDateNum
+            }
+          })
+        this.$store.dispatch('Todo/setDeadline', targets)
           .then(() => this.$toast.success('更新しました'))
           .catch((error) => {
             console.error(error)

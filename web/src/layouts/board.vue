@@ -28,6 +28,16 @@
               >
                 # {{ filter.label }}
               </div>
+
+              <nuxt-link to="/gantt">
+                <div
+                  class="py-1 px-5 cursor-pointer hover:bg-blue-700 hover:opacity-75"
+                  :class="{'bg-blue-700' : selectedType === viewType.Gantt}"
+                >
+                  # ガントチャート
+                </div>
+              </nuxt-link>
+
               <div class="mt-5 px-4 flex justify-between items-center">
                 <div class="font-bold text-lg">
                   プロジェクト
@@ -129,7 +139,7 @@ import Db from '@/plugins/db'
 
 const DialogController = Vue.extend(NewListDialog)
 const InputDialogController = Vue.extend(InputDialog)
-const viewType = { Todo: 0, Habit: 1, Today: 2 }
+const viewType = { Todo: 0, Habit: 1, Today: 2, Gantt: 3 }
 
 const MIN_SIDEBAR_WIDTH = 180
 const MAX_SIDEBAR_WIDTH_MARGIN = 255
@@ -185,6 +195,8 @@ export default {
           return viewType.Todo
         } else if (this.$route.name.startsWith('habit')) {
           return viewType.Habit
+        } else if (this.$route.name.startsWith('gantt')) {
+          return viewType.Gantt
         } else {
           return viewType.Today
         }
@@ -196,7 +208,7 @@ export default {
     widthStyle () {
       return {
         '--sidebar-width': this.sidewidth + 'px',
-        '--sidepanel-width': this.subPanel !== '' ? '25vw' : '0'
+        '--sidepanel-width': this.subPanel !== '' ? '25vw' : '0px'
       }
     }
   },
@@ -226,7 +238,6 @@ export default {
         this.$toast.error('初期化に失敗しました')
       }
     },
-
     onSelectToday (filter) {
       this.selectedTodayFilter = filter
       this.$router.push(`/today/${filter}`)
@@ -419,6 +430,7 @@ export default {
 
 .app-workspace__view {
   grid-area: app-workspace__view;
+  width: calc(100vw - var(--sidebar-width) - var(--sidepanel-width));
 }
 
 .app-workspace__view-2 {
