@@ -103,6 +103,14 @@
               >
                 ヘッダーメッセージ
               </div>
+
+              <div class="mt-5 px-4 flex items-center">
+                <nuxt-link to="/note">
+                  <div class="font-bold text-lg cursor-pointer hover:bg-blue-700 hover:opacity-75">
+                    ノート
+                  </div>
+                </nuxt-link>
+              </div>
             </div>
           </div>
         </div>
