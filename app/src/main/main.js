@@ -134,6 +134,7 @@ const setupViewLocal = async (file) => {
   win.addBrowserView(view)
   resizeView(view)
   await view.webContents.loadFile(file)
+  // view.webContents.openDevTools({ mode: 'detach' }) // debug
 }
 
 function resizeView(view) {
