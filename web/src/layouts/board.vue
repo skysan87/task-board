@@ -153,6 +153,8 @@ const MIN_SIDEBAR_WIDTH = 180
 const MAX_SIDEBAR_WIDTH_MARGIN = 255
 
 export default {
+  name: 'Board',
+
   components: {
     draggable,
     ExpandPanel,
