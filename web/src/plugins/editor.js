@@ -1,6 +1,9 @@
 import EditorJS from '@editorjs/editorjs'
 import Header from '@editorjs/header'
 import List from '@editorjs/list'
+import Checklist from '@editorjs/checklist'
+import CodeTool from '@editorjs/code'
+import Table from '@editorjs/table'
 
 export default (_, inject) => {
   inject('editor', {
@@ -10,14 +13,11 @@ export default (_, inject) => {
         placeholder,
         data,
         tools: {
-          header: {
-            class: Header,
-            inlineToolbar: true
-          },
-          list: {
-            class: List,
-            inlineToolbar: true
-          }
+          header: Header,
+          list: List,
+          checklist: Checklist,
+          code: CodeTool,
+          table: Table
         }
       })
     }
