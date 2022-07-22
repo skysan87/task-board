@@ -1,0 +1,43 @@
+import db from '@/plugins/db'
+import { note as storeNote } from '@/plugins/store-definition'
+import { Note } from '@/model/Note'
+
+const STORE_NAME = storeNote.name
+
+export class NoteDao {
+  async getAll () {
+    // データ量が大きいので、タイトルのみ取得
+    const result = await db.getAllWithTargetFields(STORE_NAME, ['id', 'title', 'updatedAt'])
+    console.log(result)
+    return result.map(r => new Note(r.id, r))
+  }
+
+  async getById (id) {
+    const result = await db.getByKey(STORE_NAME, id)
+    return new Note(result.id, result)
+  }
+
+  async add (data) {
+    const now = new Date()
+    const note = new Note('', {})
+    note.id = now.getTime().toString()
+    note.data = data
+    note.createdAt = now
+    note.updatedAt = now
+
+    await db.insert(STORE_NAME, note.getData())
+    return note
+  }
+
+  /**
+   * @param {Note} model
+   */
+  async update (model) {
+    model.updatedAt = new Date()
+    return await db.update(STORE_NAME, model.getData())
+  }
+
+  async delete (id) {
+    return await db.delete(STORE_NAME, id)
+  }
+}

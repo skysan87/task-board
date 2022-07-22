@@ -3,6 +3,7 @@ import { TodolistDao } from '@/dao/indexeddb/TodolistDao'
 import { HabitDao } from '@/dao/indexeddb/HabitDao'
 import { ConfigDao } from '@/dao/indexeddb/ConfigDao'
 import { EventDao } from '@/dao/indexeddb/EventDao'
+import { NoteDao } from '@/dao/indexeddb/NoteDao'
 
 export function CreateTodoDao () {
   return new TodoDao()
@@ -22,4 +23,8 @@ export function CreateConfigDao () {
 
 export function CreateEventDao () {
   return new EventDao()
+}
+
+export function CreateNoteDao () {
+  return new NoteDao()
 }
