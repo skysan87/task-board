@@ -1,7 +1,4 @@
-import definition from '@/plugins/store-definition'
-
-const DB_NAME = 'todolist'
-const DB_VERSION = 2 // NOTE: 定義を更新したらインクリメントする
+import { DB_NAME, DB_VERSION, definition } from '@/plugins/store-definition'
 
 let _db = null
 
@@ -164,6 +161,46 @@ class Db {
               resolve(null)
             } else {
               resolve(result)
+            }
+          }
+
+          req.onerror = () => {
+            reject(req.error)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+  }
+
+  /**
+   * 全てのレコードから特定のプロパティのみ取得
+   * @param {string} storeName
+   * @param {string[]} fieldNames
+   * @returns {Object[]}
+   */
+  getAllWithTargetFields (storeName, fieldNames) {
+    return new Promise((resolve, reject) => {
+      this.getInstance().then((db) => {
+        try {
+          const tx = db.transaction(storeName, 'readonly')
+          const store = tx.objectStore(storeName)
+          const req = store.openCursor(null, 'next')
+          const returnList = []
+
+          req.onsuccess = (ev) => {
+            const cursor = ev.target.result
+            if (cursor) {
+              const data = {}
+              for (const name of fieldNames) {
+                data[name] = cursor.value[name] ?? null
+              }
+              returnList.push(data)
+
+              cursor.continue()
+            } else {
+              resolve(returnList)
             }
           }
 
