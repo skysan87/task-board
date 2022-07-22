@@ -1,11 +1,16 @@
-<!-- TODO: 将来的に別アプリに分離する(そのため画面機能はこのコンポーネントに集約) -->
-
 <template>
   <div class="main">
     <!-- スクロール -->
-    <aside class="sidemenu bg-gray-800" :style="{ width: sidewidth + 'px' }">
+    <aside class="sidemenu bg-gray-800 text-white" :style="{ width: sidewidth + 'px' }">
       <!-- TODO: サイドメニュー: 保存データ一覧、戻るボタン -->
-      <div></div>
+      <div>
+        <button @click="load">リロード(仮)</button>
+      </div>
+      <!-- TODO: 削除ボタン -->
+      <!-- TODO: 選択ボタン -->
+      <div v-for="note in list" :key="note.id">
+        {{ note.title }}
+      </div>
     </aside>
 
     <div
@@ -18,6 +23,11 @@
     <div class="main-contents-body w-full h-screen">
       <!-- TODO: レスポンシブ対応 -> resize -->
       <div id="editor" class="border border-black" />
+      <div>
+        <button @click="save">保存</button>
+        <!-- クリアボタン -->
+        <!-- 削除ボタン -->
+      </div>
     </div>
   </div>
 </template>
@@ -39,17 +49,23 @@ export default {
       clientWidth: 0
     }
   },
+
+  computed: {
+    list () {
+      return this.$store.getters['Note/getAll']
+    }
+  },
+
   mounted () {
     window.addEventListener('mouseup', this.dragEnd, false)
     window.addEventListener('mousemove', this.dragging, false)
     window.addEventListener('resize', this.resizeSidebar, false)
 
-    // TODO: サイドメニューに表示するデータの取得
+    this.load()
 
     this.editor = this.$editor.EditorJS({
       holder: 'editor',
-      placeholder: '入力してください',
-      data: this.contentData
+      placeholder: '入力してください'
     })
   },
   beforeDestroy () {
@@ -58,7 +74,13 @@ export default {
     window.removeEventListener('resize', this.resizeSidebar, false)
   },
   methods: {
-    // TODO: 自動保存
+    load () {
+      this.$store.dispatch('Note/init')
+        .catch((error) => {
+          console.error(error)
+          this.$toast.error('読込に失敗しました')
+        })
+    },
     dragStart () {
       this.isDragging = true
       this.clientWidth = window.innerWidth
@@ -80,6 +102,21 @@ export default {
     resizeSidebar () {
       if (this.sidewidth >= window.innerWidth) {
         this.sidewidth = window.innerWidth - MAX_WIDTH_MARGIN
+      }
+    },
+    async save () {
+      try {
+        const savedData = await this.editor.save()
+        console.log(savedData) // debug
+        // 空データ
+        if (savedData.blocks.length === 0) {
+          return
+        }
+        // TODO: 新規かどうか判定
+        await this.$store.dispatch('Note/add', savedData)
+      } catch (error) {
+        console.error(error)
+        this.$toast.error('保存に失敗しました')
       }
     }
   }
