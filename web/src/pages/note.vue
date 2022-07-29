@@ -2,14 +2,20 @@
   <div class="main">
     <!-- スクロール -->
     <aside class="sidemenu bg-gray-800 text-white" :style="{ width: sidewidth + 'px' }">
-      <!-- TODO: サイドメニュー: 保存データ一覧、戻るボタン -->
       <div>
+        <!-- TODO: 固定 -->
         <button @click="load">リロード(仮)</button>
+        <!-- TODO: 戻るボタン -->
       </div>
-      <!-- TODO: 削除ボタン -->
-      <!-- TODO: 選択ボタン -->
-      <div v-for="note in list" :key="note.id">
+      <div
+        v-for="note in list"
+        :key="note.id"
+        :title="note.title"
+        @click.left="onSelect(note.id)"
+      >
+        <!-- TODO: 折返し -->
         {{ note.title }}
+        <!-- TODO: 削除ボタン -->
       </div>
     </aside>
 
@@ -24,15 +30,18 @@
       <!-- TODO: レスポンシブ対応 -> resize -->
       <div id="editor" class="border border-black" />
       <div>
+        <!-- TODO：ヘッダー固定 -->
         <button @click="save">保存</button>
         <!-- クリアボタン -->
-        <!-- 削除ボタン -->
+        <button @click="clearEditor">クリア</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Note } from '@/model/Note'
+
 const MIN_WIDTH = 180
 const MAX_WIDTH_MARGIN = 255
 
@@ -43,10 +52,10 @@ export default {
   data () {
     return {
       editor: null,
-      contentData: {},
       sidewidth: 240,
       isDragging: false,
-      clientWidth: 0
+      clientWidth: 0,
+      noteOnEdit: null
     }
   },
 
@@ -108,16 +117,45 @@ export default {
       try {
         const savedData = await this.editor.save()
         console.log(savedData) // debug
-        // 空データ
-        if (savedData.blocks.length === 0) {
-          return
+
+        if (this.noteOnEdit && (this.noteOnEdit.id ?? '') !== '') {
+          this.noteOnEdit.data = savedData
+          await this.$store.dispatch('Note/update', Note.valueOf(this.noteOnEdit))
+        } else {
+          // 空データ
+          if (savedData.blocks.length === 0) {
+            return
+          }
+          this.noteOnEdit = await this.$store.dispatch('Note/add', savedData)
         }
-        // TODO: 新規かどうか判定
-        await this.$store.dispatch('Note/add', savedData)
+        this.$toast.success('保存しました')
       } catch (error) {
         console.error(error)
         this.$toast.error('保存に失敗しました')
       }
+    },
+    onSelect (id) {
+      this.$store.dispatch('Note/get', id)
+        .then((result) => {
+          this.setEditor(result)
+        })
+        .catch((error) => {
+          console.error(error)
+          this.$toast.error('ノートの取得に失敗しました')
+        })
+    },
+    setEditor (note) {
+      this.noteOnEdit = note
+      if (note.data.blocks.length > 0) {
+        this.editor.render(note.data)
+      } else {
+        // データがない場合、レンダリングに失敗する
+        this.editor.clear()
+      }
+    },
+    clearEditor () {
+      this.noteOnEdit = null
+      this.editor.clear()
     }
   }
 }

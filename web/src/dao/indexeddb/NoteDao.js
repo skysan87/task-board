@@ -8,7 +8,6 @@ export class NoteDao {
   async getAll () {
     // データ量が大きいので、タイトルのみ取得
     const result = await db.getAllWithTargetFields(STORE_NAME, ['id', 'title', 'updatedAt'])
-    console.log(result)
     return result.map(r => new Note(r.id, r))
   }
 
