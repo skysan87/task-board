@@ -1,35 +1,44 @@
 <template>
   <div class="main">
-    <!-- スクロール -->
-    <aside class="sidemenu bg-gray-800 text-white" :style="{ width: sidewidth + 'px' }">
-      <div>
-        <!-- TODO：ヘッダー固定 -->
-        <button @click="load">リロード(仮)</button>
-        <!-- TODO: 戻るボタン -->
+    <aside
+      class="sidemenu bg-gray-800 text-white flex flex-col"
+      :style="{ width: sidewidth + 'px' }"
+    >
+      <div class="flex-none flex justify-between py-1 px-2">
+        <button @click="$router.go(-1)">
+          <fa :icon="['fas', 'arrow-left']" size="sm" />
+          <span class="ml-1 text-xm">戻る</span>
+        </button>
+        <button class="btn btn-reload border border-white" @click="load">リロード</button>
       </div>
-      <div
-        v-for="note in list"
-        :key="note.id"
-        :title="note.title"
-        class="title-box py-1 flex justify-between items-center hover:bg-blue-700 hover:opacity-75"
-        :class="{'bg-blue-700' : isSelected(note.id)}"
-      >
+
+      <div class="border-b border-gray-600 pt-1" />
+
+      <div class="flex-1 overflow-y-auto scrollable-container">
         <div
-          class="no-wrap pl-5 pr-3 flex-1 cursor-pointer"
-          @click.left="onSelect(note.id)"
+          v-for="note in list"
+          :key="note.id"
+          :title="note.title"
+          class="title-box py-1 flex justify-between items-center hover:bg-blue-700 hover:opacity-75"
+          :class="{'bg-blue-700' : isSelected(note.id)}"
         >
-          {{ note.title }}
-        </div>
-        <div
-          class="flex-none py-1 px-1 mr-2 cursor-pointer rounded-full hover:bg-gray-400"
-          @click.left.prevent="deleteNote(note.id)"
-        >
-          <fa
-            :icon="['fas', 'trash-can']"
-            size="xs"
-            class="delete-icon"
-            title="削除"
-          />
+          <div
+            class="no-wrap pl-5 pr-3 flex-1 cursor-pointer"
+            @click.left="onSelect(note.id)"
+          >
+            {{ note.title }}
+          </div>
+          <div
+            class="flex-none py-1 px-1 mr-2 cursor-pointer rounded-full hover:bg-gray-400"
+            @click.left.prevent="deleteNote(note.id)"
+          >
+            <fa
+              :icon="['fas', 'trash-can']"
+              size="xs"
+              class="delete-icon"
+              title="削除"
+            />
+          </div>
         </div>
       </div>
     </aside>
@@ -198,14 +207,14 @@ export default {
 </script>
 
 <style scoped>
-/* .scrollable-container {
+.scrollable-container {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 .scrollable-container::-webkit-scrollbar {
   display: none;
-}  */
+}
 
 .main {
   width: 100%;
@@ -219,7 +228,6 @@ export default {
 }
 
 .sidemenu {
-  overflow-y: auto;
   height: 100vh;
   box-sizing: border-box;
 }
@@ -258,5 +266,13 @@ export default {
 
 .title-box:hover .delete-icon {
   display: block;
+}
+
+.btn-reload {
+  @apply bg-gray-800;
+}
+
+.btn-reload:active {
+  @apply bg-gray-600;
 }
 </style>
