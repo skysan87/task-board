@@ -152,7 +152,12 @@ export default {
     deleteNote (id) {
       if (confirm('削除しますか？')) {
         this.$store.dispatch('Note/delete', id)
-          .then(() => this.$toast.success('削除しました'))
+          .then(() => {
+            if (this.isSelected(id)) {
+              this.clearEditor()
+            }
+            this.$toast.success('削除しました')
+          })
           .catch((error) => {
             console.error(error)
             this.$toast.error('ノートの削除に失敗しました')
