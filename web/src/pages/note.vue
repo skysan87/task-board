@@ -41,15 +41,13 @@
       @mousemove="dragging($event)"
     />
 
-    <div class="main-contents-body w-full h-screen">
-      <!-- TODO: レスポンシブ対応 -> resize -->
-      <div id="editor" class="border border-black" />
-      <div>
-        <!-- TODO：ヘッダー固定 -->
-        <button @click="save">保存</button>
-        <!-- クリアボタン -->
-        <button @click="clearEditor">クリア</button>
+    <div class="main-contents-body flex flex-col">
+      <div class="flex-none border-b py-1 px-4 text-right">
+        <button class="btn btn-regular" @click="save">保存</button>
+        <button class="btn btn-outline" @click="clearEditor">新規作成</button>
       </div>
+      <!-- TODO: レスポンシブ対応 -> resize -->
+      <div id="editor" class="border border-black overflow-y-scroll flex-1" />
     </div>
   </div>
 </template>
@@ -228,7 +226,6 @@ export default {
 
 .main-contents-body {
   height: 100vh;
-  overflow-y: auto;
 }
 
 .dragSidebar {
