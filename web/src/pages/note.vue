@@ -12,6 +12,7 @@
         :key="note.id"
         :title="note.title"
         class="title-box py-1 flex justify-between items-center hover:bg-blue-700 hover:opacity-75"
+        :class="{'bg-blue-700' : isSelected(note.id)}"
       >
         <div
           class="no-wrap pl-5 pr-3 flex-1 cursor-pointer"
@@ -168,6 +169,14 @@ export default {
           this.$toast.error('ノートの取得に失敗しました')
         })
     },
+
+    isSelected (id) {
+      if (!this.noteOnEdit) {
+        return false
+      }
+      return (this.noteOnEdit.id ?? '') === id
+    },
+
     setEditor (note) {
       this.noteOnEdit = note
       if (note.data.blocks.length > 0) {
