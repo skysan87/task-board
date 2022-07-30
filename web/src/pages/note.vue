@@ -3,7 +3,7 @@
     <!-- スクロール -->
     <aside class="sidemenu bg-gray-800 text-white" :style="{ width: sidewidth + 'px' }">
       <div>
-        <!-- TODO: 固定 -->
+        <!-- TODO：ヘッダー固定 -->
         <button @click="load">リロード(仮)</button>
         <!-- TODO: 戻るボタン -->
       </div>
@@ -11,11 +11,25 @@
         v-for="note in list"
         :key="note.id"
         :title="note.title"
-        @click.left="onSelect(note.id)"
+        class="title-box py-1 flex justify-between items-center hover:bg-blue-700 hover:opacity-75"
       >
-        <!-- TODO: 折返し -->
-        {{ note.title }}
-        <!-- TODO: 削除ボタン -->
+        <div
+          class="no-wrap pl-5 pr-3 flex-1 cursor-pointer"
+          @click.left="onSelect(note.id)"
+        >
+          {{ note.title }}
+        </div>
+        <div
+          class="flex-none py-1 px-1 mr-2 cursor-pointer rounded-full hover:bg-gray-400"
+          @click.left.prevent="deleteNote(note.id)"
+        >
+          <fa
+            :icon="['fas', 'trash-can']"
+            size="xs"
+            class="delete-icon"
+            title="削除"
+          />
+        </div>
       </div>
     </aside>
 
@@ -134,6 +148,16 @@ export default {
         this.$toast.error('保存に失敗しました')
       }
     },
+    deleteNote (id) {
+      if (confirm('削除しますか？')) {
+        this.$store.dispatch('Note/delete', id)
+          .then(() => this.$toast.success('削除しました'))
+          .catch((error) => {
+            console.error(error)
+            this.$toast.error('ノートの削除に失敗しました')
+          })
+      }
+    },
     onSelect (id) {
       this.$store.dispatch('Note/get', id)
         .then((result) => {
@@ -208,5 +232,20 @@ export default {
 
 .dragSidebar:hover {
   background: skyblue;
+}
+
+.no-wrap {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.delete-icon {
+  display: none;
+}
+
+.title-box:hover .delete-icon {
+  display: block;
 }
 </style>

@@ -56,9 +56,9 @@ export const actions = {
     }
   },
 
-  async delete ({ commit }, note) {
-    if (await dao.delete(note.id)) {
-      commit('delete', note.id)
+  async delete ({ commit }, noteId) {
+    if (await dao.delete(noteId)) {
+      commit('delete', noteId)
     }
   }
 }
