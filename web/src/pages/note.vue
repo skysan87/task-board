@@ -62,8 +62,6 @@
 </template>
 
 <script>
-import { Note } from '@/model/Note'
-
 const MIN_WIDTH = 180
 const MAX_WIDTH_MARGIN = 255
 
@@ -174,11 +172,9 @@ export default {
     async save () {
       try {
         const savedData = await this.editor.save()
-        console.log(savedData) // debug
 
         if (this.noteOnEdit && (this.noteOnEdit.id ?? '') !== '') {
-          this.noteOnEdit.data = savedData
-          await this.$store.dispatch('Note/update', Note.valueOf(this.noteOnEdit))
+          this.noteOnEdit = await this.$store.dispatch('Note/update', { note: this.noteOnEdit, newData: savedData })
         } else {
           // 空データ
           if (savedData.blocks.length === 0) {

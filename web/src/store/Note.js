@@ -50,10 +50,9 @@ export const actions = {
     return note
   },
 
-  async update ({ commit }, note) {
-    if (await dao.update(note)) {
-      commit('update', note)
-    }
+  async update ({ commit }, { note, newData }) {
+    const newNote = await dao.update(note, newData)
+    commit('update', newNote)
   },
 
   async delete ({ commit }, noteId) {

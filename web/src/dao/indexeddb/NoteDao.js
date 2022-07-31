@@ -28,12 +28,13 @@ export class NoteDao {
     return note
   }
 
-  /**
-   * @param {Note} model
-   */
-  async update (model) {
-    model.updatedAt = new Date()
-    return await db.update(STORE_NAME, model.getData())
+  async update (oldNote, data) {
+    const newNote = Note.valueOf(oldNote)
+    newNote.data = data
+    newNote.updatedAt = new Date()
+
+    await db.update(STORE_NAME, newNote)
+    return newNote
   }
 
   async delete (id) {
