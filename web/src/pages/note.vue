@@ -67,6 +67,24 @@ import { Note } from '@/model/Note'
 const MIN_WIDTH = 180
 const MAX_WIDTH_MARGIN = 255
 
+const getOS = () => {
+  const ua = window.navigator.userAgent.toLowerCase()
+
+  if (ua.includes('windows nt')) {
+    return 'WIN'
+  } else if (ua.includes('mac os x')) {
+    return 'MAC'
+  } else {
+    return 'UNKNOWN'
+  }
+}
+
+const os = {
+  isTarget: getOS() === 'UNKNOWN',
+  isWin: getOS() === 'WIN',
+  isMac: getOS() === 'MAC'
+}
+
 export default {
 
   layout: 'base',
@@ -91,6 +109,7 @@ export default {
     window.addEventListener('mouseup', this.dragEnd, false)
     window.addEventListener('mousemove', this.dragging, false)
     window.addEventListener('resize', this.resizeSidebar, false)
+    window.addEventListener('keydown', this.onSave)
 
     this.load()
 
@@ -103,6 +122,7 @@ export default {
     window.removeEventListener('mouseup', this.dragEnd, false)
     window.removeEventListener('mousemove', this.dragging, false)
     window.removeEventListener('resize', this.resizeSidebar, false)
+    window.removeEventListener('keydown', this.onSave)
   },
   methods: {
     load () {
@@ -111,6 +131,22 @@ export default {
           console.error(error)
           this.$toast.error('読込に失敗しました')
         })
+    },
+    onSave (event) {
+      if (os.isTarget) {
+        return true
+      }
+
+      const code = event.key
+      if ((os.isWin && !(code === 's' && !event.shiftKey && event.ctrlKey)) ||
+        (os.isMac && !(code === 's' && !event.shiftKey && event.metaKey))) {
+        return true
+      }
+
+      event.preventDefault()
+      this.save()
+
+      return false
     },
     dragStart () {
       this.isDragging = true
