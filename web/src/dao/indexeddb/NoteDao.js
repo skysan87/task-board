@@ -33,7 +33,7 @@ export class NoteDao {
     newNote.data = data
     newNote.updatedAt = new Date()
 
-    await db.update(STORE_NAME, newNote)
+    await db.update(STORE_NAME, newNote.getData())
     return newNote
   }
 
