@@ -56,7 +56,7 @@
         <button class="btn btn-outline" @click="clearEditor">新規作成</button>
       </div>
       <!-- TODO: レスポンシブ対応 -> resize -->
-      <div id="editor" class="border border-black overflow-y-scroll flex-1" />
+      <div id="editor" class="overflow-y-scroll flex-1" />
     </div>
   </div>
 </template>
