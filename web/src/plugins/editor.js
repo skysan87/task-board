@@ -12,6 +12,7 @@ export default (_, inject) => {
         holder,
         placeholder,
         data,
+        minHeight: 50,
         tools: {
           header: Header,
           list: List,
