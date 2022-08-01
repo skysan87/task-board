@@ -54,6 +54,7 @@
       <div class="flex-none border-b py-1 px-4 text-right">
         <button class="btn btn-regular" @click="save">保存</button>
         <button class="btn btn-outline" @click="clearEditor">新規作成</button>
+        <button class="btn btn-outline" @click="exportAsMarkdown">エクスポート</button>
       </div>
       <!-- TODO: レスポンシブ対応 -> resize -->
       <div id="editor" class="overflow-y-scroll flex-1" />
@@ -233,6 +234,20 @@ export default {
     clearEditor () {
       this.noteOnEdit = null
       this.editor.clear()
+    },
+
+    async exportAsMarkdown () {
+      try {
+        const savedData = await this.editor.save()
+        // 空データ
+        if (savedData.blocks.length === 0) {
+          return
+        }
+        console.log(this.$editor.parse({ data: savedData }))
+      } catch (error) {
+        console.error(error)
+        this.$toast.error('出力に失敗しました')
+      }
     }
   }
 }
