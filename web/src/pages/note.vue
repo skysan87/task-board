@@ -243,11 +243,24 @@ export default {
         if (savedData.blocks.length === 0) {
           return
         }
-        console.log(this.$editor.parse({ data: savedData }))
+        this.fileDownload(this.$editor.parse({ data: savedData }), `${new Date().toJSON()}.md`)
       } catch (error) {
         console.error(error)
         this.$toast.error('出力に失敗しました')
       }
+    },
+
+    fileDownload (contents, fileName) {
+      const file = new File([contents], { type: 'text/markdown', endings: 'transparent' })
+      const url = URL.createObjectURL(file)
+
+      const element = document.createElement('a')
+      document.body.appendChild(element)
+      element.href = url
+      element.download = fileName
+      element.click()
+      element.remove()
+      window.URL.revokeObjectURL(url)
     }
   }
 }
