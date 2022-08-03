@@ -53,6 +53,7 @@ export const actions = {
   async update ({ commit }, { note, newData }) {
     const newNote = await dao.update(note, newData)
     commit('update', newNote)
+    return newNote
   },
 
   async delete ({ commit }, noteId) {
