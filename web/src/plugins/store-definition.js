@@ -1,19 +1,26 @@
-const config = {
+export const DB_NAME = 'todolist'
+/**
+ * DBのバージョン
+ * NOTE: 定義を更新したらインクリメントする
+ */
+export const DB_VERSION = 3
+
+export const config = {
   name: 'config',
   indexes: []
 }
 
-const habit = {
+export const habit = {
   name: 'habit',
   indexes: []
 }
 
-const todolist = {
+export const todolist = {
   name: 'todolist',
   indexes: []
 }
 
-const todo = {
+export const todo = {
   name: 'todo',
   indexes: [
     // 今日のタスク
@@ -27,9 +34,14 @@ const todo = {
   ]
 }
 
-const event = {
+export const event = {
   name: 'event',
   indexes: []
 }
 
-export default [config, habit, todolist, todo, event]
+export const note = {
+  name: 'note',
+  indexes: []
+}
+
+export const definition = [config, habit, todolist, todo, event, note]

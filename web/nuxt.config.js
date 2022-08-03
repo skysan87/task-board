@@ -38,7 +38,8 @@ const devConfig = {
 
   plugins: [
     { src: '@/plugins/fontawesome', ssr: false },
-    { src: '@/plugins/v-calendar', ssr: false }
+    { src: '@/plugins/v-calendar', ssr: false },
+    { src: '@/plugins/editor/index.js', ssr: false }
   ],
 
   components: true,

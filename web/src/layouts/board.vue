@@ -103,6 +103,11 @@
               >
                 ヘッダーメッセージ
               </div>
+              <nuxt-link to="/note">
+                <div class="mt-5 px-4 font-bold text-lg cursor-pointer hover:bg-blue-700 hover:opacity-75">
+                  ノート
+                </div>
+              </nuxt-link>
             </div>
           </div>
         </div>
@@ -145,6 +150,8 @@ const MIN_SIDEBAR_WIDTH = 180
 const MAX_SIDEBAR_WIDTH_MARGIN = 255
 
 export default {
+  name: 'Board',
+
   components: {
     draggable,
     ExpandPanel,

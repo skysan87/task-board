@@ -145,7 +145,7 @@ export default {
   display: none;
 }
 
-::v-deep .custom-calendar.vc-container {
+::v-deep(.custom-calendar.vc-container) {
   $day-border: 1px solid #b8c2cc;
   $day-border-highlight: 1px solid #b8c2cc;
   $day-width: 90px;

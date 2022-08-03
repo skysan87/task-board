@@ -1,23 +1,20 @@
-/* purgecss start ignore */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
-/* purgecss end ignore */
 @import 'tailwindcss/utilities';
 
-/* ページ遷移時のアニメーション */
-.page-enter-active, .page-leave-active {
-  transition: opacity .3s;
-}
-.page-enter, .page-leave-to {
-  opacity: 0;
-}
-
-/* レイアウト変更時のアニメーション */
-.layout-enter-active, .layout-leave-to {
-  transition: opacity .3s;
-}
-.layout-enter, .layout-leave-to {
-  opacity: 0;
+@layer base {
+  h1 {
+    @apply text-3xl font-bold;
+  }
+  h2 {
+    @apply text-2xl font-bold;
+  }
+  h3 {
+    @apply text-xl font-bold;
+  }
+  h4 {
+    @apply text-lg font-bold;
+  }
 }
 
 .btn {
