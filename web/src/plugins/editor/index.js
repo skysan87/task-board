@@ -1,13 +1,13 @@
 import EditorJS from '@editorjs/editorjs'
 import Header from '@editorjs/header'
-import List from '@editorjs/list'
 import Checklist from '@editorjs/checklist'
+import NestedList from '@editorjs/nested-list'
 import CodeTool from '@editorjs/code'
 import Table from '@editorjs/table'
 import { parseMarkdown as parseChecklist } from './BlockTypeParser/ChecklistParser'
 import { parseMarkdown as parseCode } from './BlockTypeParser/CodeParser'
 import { parseMarkdown as parseHeader } from './BlockTypeParser/HeaderParser'
-import { parseMarkdown as parseList } from './BlockTypeParser/ListParser'
+import { parseMarkdown as parseList } from './BlockTypeParser/NestedListParser'
 import { parseMarkdown as parseParagraph } from './BlockTypeParser/ParagraphParser'
 import { parseMarkdown as parseTable } from './BlockTypeParser/TableParser'
 
@@ -21,7 +21,7 @@ export default (_, inject) => {
         minHeight: 50,
         tools: {
           header: Header,
-          list: List,
+          list: NestedList,
           checklist: Checklist,
           code: CodeTool,
           table: Table
