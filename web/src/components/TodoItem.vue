@@ -30,10 +30,16 @@
       class="cursor-pointer px-1"
       @click.stop="editEventHandler"
     />
-    <fa
-      v-show="option.showEdit && isSelected"
-      :icon="['fas', 'circle-check']"
-    />
+    <div
+      v-if="option.showEdit"
+      class="check-icon py-1 px-2 cursor-pointer rounded-full hover:bg-gray-200"
+      @click.stop="handleChecked"
+    >
+      <fa
+        :icon="['fas', 'circle-check']"
+        :class="{'text-gray-300' : !isChecked}"
+      />
+    </div>
   </div>
 </template>
 
@@ -60,7 +66,7 @@ export default {
         }
       }
     },
-    isSelected: {
+    isChecked: {
       type: Boolean,
       default: false
     }
@@ -98,6 +104,9 @@ export default {
     },
     handleSelect () {
       this.$emit('select', this.todo.id)
+    },
+    handleChecked () {
+      this.$emit('check', this.todo.id)
     }
   }
 }
