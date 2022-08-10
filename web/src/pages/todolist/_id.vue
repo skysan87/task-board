@@ -49,10 +49,11 @@
               :key="item.id"
               :todo="item"
               :option="{showPointer: editMode, showEdit: editMode}"
-              :is-selected="selectedIds.includes(item.id)"
+              :is-checked="selectedIds.includes(item.id)"
               class="list-group-item list-style"
               @edit="editTodo"
               @select="handleSelect"
+              @check="handleCheck"
             />
           </draggable>
         </div>
@@ -112,6 +113,7 @@ export default {
   },
   watch: {
     editMode (n, _) {
+      // 編集モード終了時に選択を解除する
       if (n === false) {
         this.selectedIds = []
       }
@@ -191,7 +193,12 @@ export default {
           this.$toast.error(error.message)
         })
     },
+
     handleSelect (todoId) {
+      this.$store.dispatch('Todo/select', todoId)
+    },
+
+    handleCheck (todoId) {
       if (this.editMode) {
         const index = this.selectedIds.findIndex(id => id === todoId)
         if (index >= 0) {
@@ -199,8 +206,6 @@ export default {
         } else {
           this.selectedIds.push(todoId)
         }
-      } else {
-        this.$store.dispatch('Todo/select', todoId)
       }
     },
 
@@ -239,7 +244,10 @@ export default {
       }
       if (this.selectedIds.length > 0 && confirm('削除しますか？')) {
         this.$store.dispatch('Todo/deleteTodos', this.selectedIds)
-          .then(() => this.$toast.success('削除しました'))
+          .then(() => {
+            this.selectedIds = []
+            this.$toast.success('削除しました')
+          })
           .catch((error) => {
             console.error(error)
             this.$toast.error(error.message)
