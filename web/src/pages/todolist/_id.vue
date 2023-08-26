@@ -9,7 +9,7 @@
           @click="showInfo"
         />
         <span class="mx-0.5">編集モード:</span>
-        <div class="mx-0.5 flex flex items-center">
+        <div class="mx-0.5 flex items-center">
           <v-date-picker
             is-range
             class="flex-1"
@@ -31,6 +31,25 @@
         <button class="btn-sm btn-outline mx-0.5" @click="deleteSelected">
           一括削除
         </button>
+        <button class="btn-sm btn-outline mx-0.5" @click="showModal">
+          プロジェクト移動
+        </button>
+        <dialog ref="projectModal" class="dialog">
+          <div class="flex flex-col">
+            <label v-for="list in projectList" :key="list.id" :value="list.id" class="flex items-center">
+              <input v-model="selectedListId" type="radio" :value="list.id">
+              <span class="ml-2">{{ list.title }}</span>
+            </label>
+          </div>
+          <div class="py-1 flex flex-row-reverse">
+            <button class="btn btn-regular mx-0.5" @click="changeTodolist">
+              移動
+            </button>
+            <button class="btn btn-red-outline mx-0.5" @click="() => $refs.projectModal.close()">
+              キャンセル
+            </button>
+          </div>
+        </dialog>
         <button class="btn-sm btn-regular mx-0.5" @click="cancelEditMode">
           キャンセル
         </button>
@@ -92,7 +111,8 @@ export default {
   data () {
     return {
       dialog: null,
-      selectedIds: []
+      selectedIds: [],
+      selectedListId: null
     }
   },
   computed: {
@@ -108,6 +128,16 @@ export default {
     editMode: {
       get () {
         return this.$store.getters['Todo/editMode']
+      }
+    },
+    projectList: {
+      get () {
+        return this.$store.getters['Todolist/getLists']
+      }
+    },
+    listId: {
+      get () {
+        return this.$store.getters['Todo/getCurrentListId']
       }
     }
   },
@@ -264,6 +294,33 @@ export default {
     },
     showInfo () {
       alert('選択した項目を一括操作します')
+    },
+    showModal () {
+      this.selectedListId = this.listId
+      this.$refs.projectModal.showModal()
+    },
+    changeTodolist () {
+      if (this.selectedListId === this.listId) {
+        return
+      }
+
+      const targets = this.filteredTodos
+        .filter(t => this.selectedIds.includes(t.id))
+        .map((t) => {
+          return {
+            id: t.id,
+            listId: this.selectedListId
+          }
+        })
+
+      this.$store.dispatch('Todo/changeListId', targets)
+        .catch((error) => {
+          console.error(error)
+          this.$toast.error(error.message)
+        })
+        .finally(() => {
+          this.$refs.projectModal.close()
+        })
     }
   }
 }
@@ -301,5 +358,12 @@ export default {
 /* ステータスラベル */
 .status-label {
   margin: 0 5px;
+}
+
+.dialog {
+  margin: 5vh auto 10vh;
+}
+.dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 </style>
