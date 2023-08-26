@@ -22,33 +22,38 @@
       {{ todo.title }}
     </div>
     <span v-show="isExpired" class="text-red-500 px-1 font-bold" title="期限切れ">!</span>
-    <fa
+    <icon-button
       v-show="option.showEdit == false"
-      title="編集"
-      :icon="['fas', 'edit']"
-      size="xs"
-      class="cursor-pointer px-1"
-      @click.stop="editEventHandler"
-    />
-    <div
+      @click.stop.native="editEventHandler"
+    >
+      <fa
+        title="編集"
+        :icon="['fas', 'edit']"
+        size="xs"
+      />
+    </icon-button>
+    <icon-button
       v-if="option.showEdit"
-      class="check-icon py-1 px-2 cursor-pointer rounded-full hover:bg-gray-200"
-      @click.stop="handleChecked"
+      @click.stop.native="handleChecked"
     >
       <fa
         :icon="['fas', 'circle-check']"
         :class="{'text-gray-300' : !isChecked}"
       />
-    </div>
+    </icon-button>
   </div>
 </template>
 
 <script>
 import { getStateColor } from '@/util/StateColor'
 import { Todo } from '@/model/Todo'
+import IconButton from '@/components/parts/IconButton'
 
 export default {
   name: 'TodoItem',
+  components: {
+    IconButton
+  },
   props: {
     todo: {
       type: Object,

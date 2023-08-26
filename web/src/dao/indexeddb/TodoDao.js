@@ -111,10 +111,10 @@ export class TodoDao {
   }
 
   /**
-   * 期間の変更
-   * @param {Array<{id: String, startdate: Number, enddate: Number}>} targets
+   * 対象の項目のみ更新
+   * @param {Array<any>} targets
    */
-  async updateDeadlines (targets) {
+  async updateFields (targets) {
     const updateDatas = targets.map((t) => {
       return {
         ...t,
