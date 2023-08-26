@@ -173,6 +173,15 @@ export const mutations = {
     todo.enddate = payload.enddate
   },
 
+  updateListId (state, payload) {
+    const index = state.todos.findIndex(v => v.id === payload.id)
+    // プロジェクトの変更
+    if (state.listId !== '' && state.listId !== payload.listId) {
+      state.todos.splice(index, 1)
+    }
+    checkSelected(state)
+  },
+
   deleteTodos (state, targetIds) {
     state.todos = state.todos.filter(t => targetIds.includes(t.id) === false)
     checkSelected(state)
@@ -343,9 +352,23 @@ export const actions = {
     }
   },
 
+  /**
+   * @param {*} param0
+   * @param {Array<{id: String, startdate: Number, enddate: Number}>} targets
+   */
   async setDeadline ({ commit }, targets) {
-    if (await dao.updateDeadlines(targets)) {
+    if (await dao.updateFields(targets)) {
       targets.forEach(t => commit('updateDeadline', t))
+    }
+  },
+
+  /**
+   * @param {*} param0
+   * @param {Array<{id: String, listId: String}>} targets
+   */
+  async changeListId ({ commit }, targets) {
+    if (await dao.updateFields(targets)) {
+      targets.forEach(t => commit('updateListId', t))
     }
   },
 
